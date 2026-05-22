@@ -1,0 +1,38 @@
+[
+    {
+        "merged": "com.statusmaker.videoapp-mergeDebugResources-72:/layout/activity_splash.xml",
+        "source": "com.statusmaker.videoapp-main-75:/layout/activity_splash.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-mergeDebugResources-72:/layout/fragment_home.xml",
+        "source": "com.statusmaker.videoapp-main-75:/layout/fragment_home.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-mergeDebugResources-72:/layout/fragment_preview.xml",
+        "source": "com.statusmaker.videoapp-main-75:/layout/fragment_preview.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-mergeDebugResources-72:/layout/fragment_premium.xml",
+        "source": "com.statusmaker.videoapp-main-75:/layout/fragment_premium.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-mergeDebugResources-72:/layout/item_template.xml",
+        "source": "com.statusmaker.videoapp-main-75:/layout/item_template.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-mergeDebugResources-72:/layout/fragment_template_list.xml",
+        "source": "com.statusmaker.videoapp-main-75:/layout/fragment_template_list.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-mergeDebugResources-72:/layout/activity_main.xml",
+        "source": "com.statusmaker.videoapp-main-75:/layout/activity_main.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-mergeDebugResources-72:/layout/item_category.xml",
+        "source": "com.statusmaker.videoapp-main-75:/layout/item_category.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-mergeDebugResources-72:/layout/fragment_editor.xml",
+        "source": "com.statusmaker.videoapp-main-75:/layout/fragment_editor.xml"
+    }
+]

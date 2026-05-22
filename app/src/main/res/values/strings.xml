@@ -1,0 +1,38 @@
+<resources>
+    <string name="app_name">Status Maker - Video &amp; Reels</string>
+    <string name="splash_tagline">పండుగ వీడియోలు • Birthday Wishes • Political Edits</string>
+
+    <!-- Home -->
+    <string name="home_hero_title">Create Viral Status Videos 🎬</string>
+    <string name="home_hero_subtitle">Telugu templates for festivals, birthdays,\ndevotional &amp; political edits</string>
+    <string name="create_video">Create Video</string>
+    <string name="choose_category">Choose Category</string>
+
+    <!-- Editor -->
+    <string name="add_photo">Add Your Photo</string>
+    <string name="photo_hint">Tap to select from gallery</string>
+    <string name="hint_person_name">Name / పేరు *</string>
+    <string name="hint_village_name">Village / Town / గ్రామం</string>
+    <string name="hint_business_name">Business Name / వ్యాపారం పేరు</string>
+    <string name="hint_festival_name">Festival / Occasion / పండుగ</string>
+    <string name="hint_custom_message">Custom Message / సందేశం (optional)</string>
+    <string name="music_style">Music Style / సంగీతం</string>
+    <string name="preview_video">Preview &amp; Continue →</string>
+
+    <!-- Errors -->
+    <string name="error_name_required">Please enter a name / పేరు నమోదు చేయండి</string>
+    <string name="error_export_failed">Export failed. Please try again.</string>
+
+    <!-- Sharing -->
+    <string name="share_via_whatsapp">Share on WhatsApp</string>
+    <string name="share_video">Share Video</string>
+
+    <!-- Premium -->
+    <string name="go_premium">Upgrade to Premium</string>
+    <string name="premium_features">Remove watermark • No ads • All templates</string>
+
+    <!-- Bottom Nav -->
+    <string name="nav_home">Home</string>
+    <string name="nav_templates">Templates</string>
+    <string name="nav_premium">Premium</string>
+</resources>

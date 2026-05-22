@@ -1,0 +1,21 @@
+// Top-level build file
+buildscript {
+    ext.kotlin_version = "1.9.22"
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath "com.android.tools.build:gradle:8.2.2"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "com.google.gms:google-services:4.4.1"
+        classpath "androidx.navigation:navigation-safe-args-gradle-plugin:2.7.6"
+    }
+}
+
+// NOTE: allprojects repositories block intentionally removed.
+// All dependency repos are declared in settings.gradle under dependencyResolutionManagement.
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}

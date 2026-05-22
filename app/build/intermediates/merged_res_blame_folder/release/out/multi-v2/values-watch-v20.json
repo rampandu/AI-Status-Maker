@@ -1,0 +1,20 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.statusmaker.videoapp-mergeReleaseResources-71:/values-watch-v20/values-watch-v20.xml",
+            "map": [
+                {
+                    "source": "C:\\Users\\rampa\\.gradle\\caches\\transforms-3\\53321f8e63498c5a094b01b6314e7359\\transformed\\appcompat-1.6.1\\res\\values-watch-v20\\values-watch-v20.xml",
+                    "from": {
+                        "startLines": "2,5,8",
+                        "startColumns": "4,4,4",
+                        "startOffsets": "55,214,385",
+                        "endLines": "4,7,10",
+                        "endColumns": "12,12,12",
+                        "endOffsets": "209,380,553"
+                    }
+                }
+            ]
+        }
+    ]
+}

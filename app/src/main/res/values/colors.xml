@@ -1,0 +1,36 @@
+<resources>
+    <!-- Dark theme base -->
+    <color name="bg_dark">#0D0D1A</color>
+    <color name="surface_dark">#1A1A2E</color>
+    <color name="surface_elevated">#16213E</color>
+
+    <!-- Accent colors -->
+    <color name="accent_gold">#FFD700</color>
+    <color name="accent_orange">#FF6B35</color>
+    <color name="accent_blue">#4B9FE1</color>
+    <color name="accent_pink">#FF69B4</color>
+    <color name="accent_green">#4CAF50</color>
+    <color name="accent_purple">#9C27B0</color>
+
+    <!-- Text -->
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#B3B3CC</color>
+    <color name="text_hint">#666680</color>
+
+    <!-- Gradient colors -->
+    <color name="gradient_start">#1E1E3F</color>
+    <color name="gradient_end">#0D0D1A</color>
+
+    <!-- Status colors -->
+    <color name="success">#4CAF50</color>
+    <color name="error">#F44336</color>
+    <color name="warning">#FF9800</color>
+
+    <!-- Common -->
+    <color name="white">#FFFFFF</color>
+    <color name="transparent">#00000000</color>
+
+    <!-- Bottom nav selector -->
+    <color name="bottom_nav_active">@color/accent_gold</color>
+    <color name="bottom_nav_inactive">@color/text_secondary</color>
+</resources>

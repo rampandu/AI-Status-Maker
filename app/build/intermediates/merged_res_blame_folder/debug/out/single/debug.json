@@ -1,0 +1,314 @@
+[
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/layout_fragment_editor.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/layout/fragment_editor.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/drawable_thumb_political_3.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/drawable/thumb_political_3.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/drawable_thumb_durga.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/drawable/thumb_durga.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/drawable_thumb_baby_boy.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/drawable/thumb_baby_boy.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/layout_fragment_home.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/layout/fragment_home.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/drawable_thumb_baby_shower.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/drawable/thumb_baby_shower.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/drawable_bg_button_gold.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/drawable/bg_button_gold.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/drawable_ic_app_logo.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/drawable/ic_app_logo.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/drawable_ic_whatsapp.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/drawable/ic_whatsapp.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/mipmap-anydpi-v26/ic_launcher_round.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/drawable_bg_category_badge.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/drawable/bg_category_badge.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/drawable_thumb_diwali.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/drawable/thumb_diwali.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/drawable_thumb_dasara.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/drawable/thumb_dasara.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/drawable_thumb_biz_opening.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/drawable/thumb_biz_opening.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/mipmap-hdpi_ic_launcher_round.png.flat",
+        "source": "com.statusmaker.videoapp-main-75:/mipmap-hdpi/ic_launcher_round.png"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/drawable_bg_card_dark.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/drawable/bg_card_dark.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/anim_slide_in_right.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/anim/slide_in_right.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/drawable_bg_photo_selector.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/drawable/bg_photo_selector.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/mipmap-xxhdpi_ic_launcher.png.flat",
+        "source": "com.statusmaker.videoapp-main-75:/mipmap-xxhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/anim_slide_out_right.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/anim/slide_out_right.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/drawable_thumb_wedding_classic.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/drawable/thumb_wedding_classic.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/mipmap-mdpi_ic_launcher_round.png.flat",
+        "source": "com.statusmaker.videoapp-main-75:/mipmap-mdpi/ic_launcher_round.png"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/layout_item_template.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/layout/item_template.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/drawable_ic_back.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/drawable/ic_back.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/drawable_thumb_krishna.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/drawable/thumb_krishna.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/drawable_ic_chevron_right.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/drawable/ic_chevron_right.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/drawable_thumb_baby_girl.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/drawable/thumb_baby_girl.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/drawable_thumb_political_2.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/drawable/thumb_political_2.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/drawable_thumb_bday_rose.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/drawable/thumb_bday_rose.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/drawable_bg_button_outline.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/drawable/bg_button_outline.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/drawable_thumb_bday_gold.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/drawable/thumb_bday_gold.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/drawable_ic_templates.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/drawable/ic_templates.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/layout_fragment_premium.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/layout/fragment_premium.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/mipmap-hdpi_ic_launcher.png.flat",
+        "source": "com.statusmaker.videoapp-main-75:/mipmap-hdpi/ic_launcher.png"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/drawable_ic_home.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/drawable/ic_home.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/drawable_bg_spinner.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/drawable/bg_spinner.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/navigation_nav_graph.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/navigation/nav_graph.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/drawable_thumb_baby_naming.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/drawable/thumb_baby_naming.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/drawable_ic_add_photo.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/drawable/ic_add_photo.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/mipmap-xxxhdpi_ic_launcher_round.png.flat",
+        "source": "com.statusmaker.videoapp-main-75:/mipmap-xxxhdpi/ic_launcher_round.png"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/xml_file_paths.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/xml/file_paths.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/drawable_thumb_bday_kids.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/drawable/thumb_bday_kids.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/menu_bottom_nav_menu.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/menu/bottom_nav_menu.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/anim_slide_in_left.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/anim/slide_in_left.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/drawable_thumb_sankranti.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/drawable/thumb_sankranti.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/drawable_bg_chip_selected.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/drawable/bg_chip_selected.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/layout_fragment_template_list.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/layout/fragment_template_list.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/mipmap-xxhdpi_ic_launcher_round.png.flat",
+        "source": "com.statusmaker.videoapp-main-75:/mipmap-xxhdpi/ic_launcher_round.png"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/drawable_thumb_ugadi.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/drawable/thumb_ugadi.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/mipmap-anydpi-v26/ic_launcher.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/drawable_thumb_political_1.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/drawable/thumb_political_1.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/color_bottom_nav_color.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/color/bottom_nav_color.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/drawable_thumb_biz_offer.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/drawable/thumb_biz_offer.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/drawable_thumb_wedding_modern.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/drawable/thumb_wedding_modern.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/drawable_ic_launcher_foreground.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/drawable/ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/drawable_thumb_rama.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/drawable/thumb_rama.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/drawable_ic_launcher_background.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/drawable/ic_launcher_background.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/drawable_ic_crown.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/drawable/ic_crown.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/drawable_thumb_bday_blue.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/drawable/thumb_bday_blue.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/layout_fragment_preview.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/layout/fragment_preview.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/drawable_thumb_vinayaka.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/drawable/thumb_vinayaka.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/mipmap-xhdpi_ic_launcher.png.flat",
+        "source": "com.statusmaker.videoapp-main-75:/mipmap-xhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/drawable_bg_chip_unselected.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/drawable/bg_chip_unselected.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/drawable_ic_share.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/drawable/ic_share.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/layout_item_category.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/layout/item_category.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/layout_activity_main.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/layout/activity_main.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/raw_loading_dots.json.flat",
+        "source": "com.statusmaker.videoapp-main-75:/raw/loading_dots.json"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/drawable_ic_play_circle.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/drawable/ic_play_circle.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/drawable_bg_premium_badge.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/drawable/bg_premium_badge.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/mipmap-xxxhdpi_ic_launcher.png.flat",
+        "source": "com.statusmaker.videoapp-main-75:/mipmap-xxxhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/anim_slide_out_left.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/anim/slide_out_left.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/mipmap-mdpi_ic_launcher.png.flat",
+        "source": "com.statusmaker.videoapp-main-75:/mipmap-mdpi/ic_launcher.png"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/drawable_thumb_balaji.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/drawable/thumb_balaji.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/mipmap-xhdpi_ic_launcher_round.png.flat",
+        "source": "com.statusmaker.videoapp-main-75:/mipmap-xhdpi/ic_launcher_round.png"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/drawable_thumb_bathukamma.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/drawable/thumb_bathukamma.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/drawable_bg_bottom_nav.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/drawable/bg_bottom_nav.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/drawable_ic_template_placeholder.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/drawable/ic_template_placeholder.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/layout_activity_splash.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/layout/activity_splash.xml"
+    }
+]

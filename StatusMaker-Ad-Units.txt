@@ -1,0 +1,30 @@
+Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+AI Status Makerca-app-pub-9535310271167305~8024002858
+Follow the banner implementation guide to integrate the SDK. You'll specify ad type, size, and placement when you integrate the code using this ad unit ID:
+statusMakerBannerca-app-pub-9535310271167305/1410870345
+Review the AdMob policies to ensure your implementation complies.
+
+
+-----------------------------------------------------------------------------------------------
+
+
+Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+AI Status Makerca-app-pub-9535310271167305~8024002858
+Follow the interstitial implementation guide to integrate the SDK. You'll specify ad type and placement when you integrate the code using this ad unit ID:
+statusMakerInterstitialca-app-pub-9535310271167305/4104939141
+Review the AdMob policies to ensure your implementation complies.
+
+
+-----------------------------------------------------
+
+Next, place the ad unit inside your app
+Follow these instructions:
+Complete the instructions in the Google Mobile Ads SDK guide using this app ID:
+AI Status Makerca-app-pub-9535310271167305~8024002858
+Follow the interstitial implementation guide to integrate the SDK. You'll specify ad type and placement when you integrate the code using this ad unit ID:
+statusMakerInterstitialca-app-pub-9535310271167305/4104939141
+Review the AdMob policies to ensure your implementation complies.
