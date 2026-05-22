@@ -1,6 +1,7 @@
 package com.statusmaker.videoapp
 
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
@@ -12,32 +13,29 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var navController: NavController
 
+    private val bottomNavDestinations = setOf(
+        R.id.homeFragment,
+        R.id.templateListFragment,
+        R.id.myVideosFragment,
+        R.id.premiumFragment
+    )
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val navHostFragment = supportFragmentManager
+        val navHost = supportFragmentManager
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
-        navController = navHostFragment.navController
+        navController = navHost.navController
 
         binding.bottomNavigation.setupWithNavController(navController)
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
-            when (destination.id) {
-                R.id.homeFragment,
-                R.id.templateListFragment,
-                R.id.premiumFragment -> {
-                    binding.bottomNavigation.visibility = android.view.View.VISIBLE
-                }
-                else -> {
-                    binding.bottomNavigation.visibility = android.view.View.GONE
-                }
-            }
+            binding.bottomNavigation.visibility =
+                if (destination.id in bottomNavDestinations) View.VISIBLE else View.GONE
         }
     }
 
-    override fun onSupportNavigateUp(): Boolean {
-        return navController.navigateUp() || super.onSupportNavigateUp()
-    }
+    override fun onSupportNavigateUp() = navController.navigateUp() || super.onSupportNavigateUp()
 }

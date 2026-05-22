@@ -1,8 +1,11 @@
 package com.statusmaker.videoapp.ui.editor
 
+import android.Manifest
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.view.LayoutInflater
@@ -11,11 +14,11 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
-import com.statusmaker.videoapp.R
 import com.statusmaker.videoapp.data.model.FestivalPresets
 import com.statusmaker.videoapp.data.model.MusicStyle
 import com.statusmaker.videoapp.data.model.UserInput
@@ -32,12 +35,25 @@ class EditorFragment : Fragment() {
 
     private var selectedPhotoUri: Uri? = null
 
-    // Photo picker launcher
+    // FIX #13: Permission launcher before photo picker
+    private val permissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) openPhotoPicker()
+        else Toast.makeText(requireContext(), "Gallery permission needed to pick a photo", Toast.LENGTH_SHORT).show()
+    }
+
     private val photoPickerLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             result.data?.data?.let { uri ->
+                // Persist permission across restarts
+                try {
+                    requireContext().contentResolver.takePersistableUriPermission(
+                        uri, Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    )
+                } catch (_: SecurityException) {}
                 selectedPhotoUri = uri
                 Glide.with(this).load(uri).circleCrop().into(binding.ivSelectedPhoto)
                 binding.tvPhotoHint.visibility = View.GONE
@@ -45,9 +61,7 @@ class EditorFragment : Fragment() {
         }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
-    ): View {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentEditorBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -55,97 +69,120 @@ class EditorFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // FIX #5: safe navigation if templateId is missing
         val templateId = arguments?.getString("templateId") ?: run {
-            findNavController().navigateUp()
-            return
+            findNavController().navigateUp(); return
         }
         viewModel.loadTemplate(templateId)
-
         setupUI()
         observeViewModel()
     }
 
     private fun setupUI() {
-        // Photo picker
-        binding.cvPhotoSelector.setOnClickListener {
-            val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-            photoPickerLauncher.launch(intent)
-        }
+        binding.cvPhotoSelector.setOnClickListener { checkPermissionAndPick() }
 
-        // Festival name dropdown
-        val festivalAdapter = ArrayAdapter(
-            requireContext(),
-            android.R.layout.simple_dropdown_item_1line,
-            FestivalPresets.list
+        // Festival dropdown
+        binding.actvFestivalName.setAdapter(
+            ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, FestivalPresets.list)
         )
-        binding.actvFestivalName.setAdapter(festivalAdapter)
 
-        // Music style spinner
-        val musicStyles = MusicStyle.values()
-        val musicAdapter = ArrayAdapter(
+        // Music spinner
+        val styles = MusicStyle.values()
+        binding.spinnerMusicStyle.adapter = ArrayAdapter(
             requireContext(),
             android.R.layout.simple_spinner_item,
-            musicStyles.map { "${it.displayName} • ${it.teluguName}" }
-        )
-        musicAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        binding.spinnerMusicStyle.adapter = musicAdapter
+            styles.map { "🎵 ${it.displayName}  •  ${it.teluguName}" }
+        ).also { it.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) }
 
-        // Preview button
         binding.btnPreview.setOnClickListener {
             val input = buildUserInput() ?: return@setOnClickListener
-            val action = EditorFragmentDirections.actionEditorFragmentToPreviewFragment(
-                templateId = viewModel.template.value!!.id,
-                personName = input.personName,
-                villageName = input.villageName,
-                businessName = input.businessName,
-                festivalName = input.festivalName,
-                customMessage = input.customMessage,
-                photoUri = input.personPhotoUri ?: "",
-                musicStyleOrdinal = input.musicStyle.ordinal
+            // FIX #5: null-safe template access
+            val tId = viewModel.template.value?.id ?: run {
+                Toast.makeText(requireContext(), "Template not loaded, please wait…", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            findNavController().navigate(
+                EditorFragmentDirections.actionEditorFragmentToPreviewFragment(
+                    templateId       = tId,
+                    personName       = input.personName,
+                    villageName      = input.villageName,
+                    businessName     = input.businessName,
+                    festivalName     = input.festivalName,
+                    customMessage    = input.customMessage,
+                    photoUri         = input.personPhotoUri ?: "",
+                    musicStyleOrdinal = input.musicStyle.ordinal
+                )
             )
-            findNavController().navigate(action)
         }
 
         binding.toolbar.setNavigationOnClickListener { findNavController().navigateUp() }
     }
 
+    private fun checkPermissionAndPick() {
+        val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+            Manifest.permission.READ_MEDIA_IMAGES
+        else
+            Manifest.permission.READ_EXTERNAL_STORAGE
+
+        when {
+            ContextCompat.checkSelfPermission(requireContext(), permission) == PackageManager.PERMISSION_GRANTED ->
+                openPhotoPicker()
+            shouldShowRequestPermissionRationale(permission) -> {
+                Toast.makeText(requireContext(), "Gallery access needed to add your photo", Toast.LENGTH_LONG).show()
+                permissionLauncher.launch(permission)
+            }
+            else -> permissionLauncher.launch(permission)
+        }
+    }
+
+    private fun openPhotoPicker() {
+        photoPickerLauncher.launch(
+            Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        )
+    }
+
     private fun observeViewModel() {
         viewModel.template.observe(viewLifecycleOwner) { template ->
             template ?: return@observe
-            binding.tvTemplateName.text = template.name
+            binding.tvTemplateName.text     = template.name
             binding.tvTemplateTeluguName.text = template.teluguName
-            binding.tvCategoryBadge.text = "${template.category.emoji} ${template.category.displayName}"
+            binding.tvCategoryBadge.text    = "${template.category.emoji} ${template.category.displayName}"
 
-            // Pre-fill festival name for festival-specific templates
+            // Pre-fill festival name only if field is empty
             if (binding.actvFestivalName.text.isEmpty()) {
                 binding.actvFestivalName.setText(template.teluguName, false)
             }
+
+            // Pre-select matching music style
+            val defaultStyle = template.musicStyle
+            val idx = MusicStyle.values().indexOfFirst { it == defaultStyle }
+            if (idx >= 0) binding.spinnerMusicStyle.setSelection(idx)
         }
     }
 
     private fun buildUserInput(): UserInput? {
-        val name = binding.etPersonName.text?.toString()?.trim() ?: ""
+        val name    = binding.etPersonName.text?.toString()?.trim() ?: ""
         val village = binding.etVillageName.text?.toString()?.trim() ?: ""
-        val business = binding.etBusinessName.text?.toString()?.trim() ?: ""
-        val festival = binding.actvFestivalName.text?.toString()?.trim() ?: ""
-        val message = binding.etCustomMessage.text?.toString()?.trim() ?: ""
+        val biz     = binding.etBusinessName.text?.toString()?.trim() ?: ""
+        val fest    = binding.actvFestivalName.text?.toString()?.trim() ?: ""
+        val msg     = binding.etCustomMessage.text?.toString()?.trim() ?: ""
 
         if (name.isEmpty()) {
             binding.tilPersonName.error = "పేరు నమోదు చేయండి (Enter name)"
+            binding.tilPersonName.requestFocus()
             return null
         }
         binding.tilPersonName.error = null
 
-        val musicStyle = MusicStyle.values()[binding.spinnerMusicStyle.selectedItemPosition]
-
+        val music = MusicStyle.values()[binding.spinnerMusicStyle.selectedItemPosition]
         return UserInput(
-            personName = name,
+            personName    = name,
             personPhotoUri = selectedPhotoUri?.toString(),
-            villageName = village,
-            businessName = business,
-            festivalName = festival,
-            customMessage = message,
-            musicStyle = musicStyle
+            villageName   = village,
+            businessName  = biz,
+            festivalName  = fest,
+            customMessage = msg,
+            musicStyle    = music
         )
     }
 

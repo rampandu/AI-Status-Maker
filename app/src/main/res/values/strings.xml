@@ -35,4 +35,8 @@
     <string name="nav_home">Home</string>
     <string name="nav_templates">Templates</string>
     <string name="nav_premium">Premium</string>
+    <string name="my_videos">My Videos</string>
+    <string name="nav_my_videos">My Videos</string>
+    <string name="export_in_progress">Export in progress…</string>
+    <string name="no_videos_yet">No videos yet</string>
 </resources>

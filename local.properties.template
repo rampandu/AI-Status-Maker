@@ -1,0 +1,10 @@
+# Copy this file to local.properties and fill in your values.
+# NEVER commit local.properties to git — it contains secrets.
+
+sdk.dir=C\:\\Users\\YOUR_NAME\\AppData\\Local\\Android\\Sdk
+
+# Release keystore (used in app/build.gradle signingConfigs.release)
+KEYSTORE_PATH=keystore/release.jks
+KEYSTORE_PASS=your_store_password
+KEY_ALIAS=statusmaker
+KEY_PASS=your_key_password

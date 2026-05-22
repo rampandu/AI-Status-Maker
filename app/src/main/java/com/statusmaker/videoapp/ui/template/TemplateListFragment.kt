@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
+import com.google.android.material.chip.Chip
 import com.statusmaker.videoapp.data.model.Template
 import com.statusmaker.videoapp.data.model.TemplateCategory
 import com.statusmaker.videoapp.databinding.FragmentTemplateListBinding
@@ -21,9 +22,9 @@ class TemplateListFragment : Fragment() {
         TemplateListViewModel.Factory(requireContext())
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
-    ): View {
+    private lateinit var templateAdapter: TemplateAdapter
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentTemplateListBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -31,43 +32,55 @@ class TemplateListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val categoryArg = arguments?.getString("category")
-        val category = categoryArg?.let {
-            try { TemplateCategory.valueOf(it) } catch (e: Exception) { null }
+        val initialCategory = arguments?.getString("category")?.let {
+            try { TemplateCategory.valueOf(it) } catch (_: Exception) { null }
         }
 
-        viewModel.loadTemplates(category)
-
-        val adapter = TemplateAdapter { template -> onTemplateSelected(template) }
+        templateAdapter = TemplateAdapter { template -> onTemplateSelected(template) }
         binding.rvTemplates.apply {
             layoutManager = GridLayoutManager(requireContext(), 2)
-            this.adapter = adapter
+            adapter = templateAdapter
         }
 
-        setupCategoryChips()
+        // FIX #8: build chips ONCE at setup time, not on every category change
+        buildCategoryChips()
 
-        viewModel.templates.observe(viewLifecycleOwner) { templates ->
-            adapter.submitList(templates)
-            binding.tvTemplateCount.text = "${templates.size} Templates"
-            binding.emptyView.visibility = if (templates.isEmpty()) View.VISIBLE else View.GONE
+        viewModel.loadTemplates(initialCategory)
+
+        viewModel.templates.observe(viewLifecycleOwner) { list ->
+            templateAdapter.submitList(list)
+            binding.tvTemplateCount.text = "${list.size} Templates"
+            binding.emptyView.visibility = if (list.isEmpty()) View.VISIBLE else View.GONE
         }
 
         viewModel.selectedCategory.observe(viewLifecycleOwner) { cat ->
             binding.tvCategoryTitle.text = cat?.displayName ?: "All Templates"
+            // Update chip check state without recreating chips
+            for (i in 0 until binding.chipGroupCategories.childCount) {
+                val chip = binding.chipGroupCategories.getChildAt(i) as? Chip ?: continue
+                val chipCategory = chip.tag as? TemplateCategory
+                chip.isChecked = chipCategory == cat
+            }
         }
 
         binding.toolbar.setNavigationOnClickListener { findNavController().navigateUp() }
     }
 
-    private fun setupCategoryChips() {
-        val allCategories = listOf(null) + TemplateCategory.values().toList()
+    private fun buildCategoryChips() {
         binding.chipGroupCategories.removeAllViews()
 
-        allCategories.forEach { category ->
-            val chip = com.google.android.material.chip.Chip(requireContext()).apply {
-                text = if (category == null) "All" else "${category.emoji} ${category.displayName}"
-                isCheckable = true
-                isChecked = category == viewModel.selectedCategory.value
+        // "All" chip
+        val allChip = Chip(requireContext()).apply {
+            text = "All"; tag = null; isCheckable = true; isChecked = true
+            setOnClickListener { viewModel.loadTemplates(null) }
+        }
+        binding.chipGroupCategories.addView(allChip)
+
+        // Category chips
+        TemplateCategory.values().forEach { category ->
+            val chip = Chip(requireContext()).apply {
+                text = "${category.emoji} ${category.displayName}"
+                tag = category; isCheckable = true
                 setOnClickListener { viewModel.loadTemplates(category) }
             }
             binding.chipGroupCategories.addView(chip)
@@ -75,9 +88,9 @@ class TemplateListFragment : Fragment() {
     }
 
     private fun onTemplateSelected(template: Template) {
-        val action = TemplateListFragmentDirections
-            .actionTemplateListFragmentToEditorFragment(template.id)
-        findNavController().navigate(action)
+        findNavController().navigate(
+            TemplateListFragmentDirections.actionTemplateListFragmentToEditorFragment(template.id)
+        )
     }
 
     override fun onDestroyView() {

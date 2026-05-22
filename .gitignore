@@ -1,0 +1,25 @@
+# Android
+*.iml
+.gradle/
+local.properties
+.idea/
+.DS_Store
+
+# Ignore all build folders
+build/
+
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Keystore — NEVER commit these
+*.jks
+*.keystore
+app/keystore/release.jks
+
+# Google services — contains API keys
+app/google-services.json
+
+# Build outputs
+app/release/
+app/debug/
