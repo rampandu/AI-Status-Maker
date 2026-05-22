@@ -1,13 +1,32 @@
 {
   "project_info": {
-    "project_number": "REPLACE_WITH_YOUR_PROJECT_NUMBER",
-    "project_id": "REPLACE_WITH_YOUR_PROJECT_ID",
-    "storage_bucket": "REPLACE_WITH_YOUR_PROJECT_ID.appspot.com"
+    "project_number": "110216327519",
+    "project_id": "ar-ruler-fb772",
+    "storage_bucket": "ar-ruler-fb772.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:REPLACE_PROJECT_NUMBER:android:REPLACE_APP_ID",
+        "mobilesdk_app_id": "1:110216327519:android:94ec98be863d8f3b6c06ea",
+        "android_client_info": {
+          "package_name": "com.measure.arapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC4xJZ2KpXo3G0PEzwoNhrnOSmT6A55A7E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:110216327519:android:829c3379e8fc836a6c06ea",
         "android_client_info": {
           "package_name": "com.statusmaker.videoapp"
         }
@@ -15,7 +34,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "REPLACE_WITH_YOUR_API_KEY"
+          "current_key": "AIzaSyC4xJZ2KpXo3G0PEzwoNhrnOSmT6A55A7E"
         }
       ],
       "services": {
