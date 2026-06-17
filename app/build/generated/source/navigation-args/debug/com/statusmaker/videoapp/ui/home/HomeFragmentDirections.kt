@@ -27,5 +27,8 @@ public class HomeFragmentDirections private constructor() {
 
     public fun actionHomeFragmentToPremiumFragment(): NavDirections =
         ActionOnlyNavDirections(R.id.action_homeFragment_to_premiumFragment)
+
+    public fun actionHomeFragmentToMyVideosFragment(): NavDirections =
+        ActionOnlyNavDirections(R.id.action_homeFragment_to_myVideosFragment)
   }
 }

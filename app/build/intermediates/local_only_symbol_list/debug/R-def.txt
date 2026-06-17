@@ -48,6 +48,7 @@ drawable ic_play_circle
 drawable ic_share
 drawable ic_template_placeholder
 drawable ic_templates
+drawable ic_video_library
 drawable ic_whatsapp
 drawable thumb_baby_boy
 drawable thumb_baby_girl
@@ -75,6 +76,7 @@ drawable thumb_vinayaka
 drawable thumb_wedding_classic
 drawable thumb_wedding_modern
 id action_editorFragment_to_previewFragment
+id action_homeFragment_to_myVideosFragment
 id action_homeFragment_to_premiumFragment
 id action_homeFragment_to_templateListFragment
 id action_templateListFragment_to_editorFragment
@@ -94,10 +96,12 @@ id btnRestorePurchases
 id btnShare
 id btnWhatsApp
 id cardAdNotice
+id cardVideo
 id categoryContainer
 id chipGroupCategories
 id cvPhotoSelector
 id editorFragment
+id emptyState
 id emptyView
 id etBusinessName
 id etCustomMessage
@@ -112,7 +116,9 @@ id ivPreviewFrame
 id ivSelectedPhoto
 id ivSplashLogo
 id ivTemplateThumbnail
+id ivThumbnail
 id lottieLoading
+id myVideosFragment
 id nav_graph
 id nav_host_fragment
 id playerView
@@ -120,6 +126,7 @@ id premiumFragment
 id premiumSuccessGroup
 id previewFragment
 id rvCategories
+id rvMyVideos
 id rvTemplates
 id spinnerMusicStyle
 id templateContainer
@@ -134,6 +141,7 @@ id tvCategoryName
 id tvCategoryTelugu
 id tvCategoryTitle
 id tvExportStatus
+id tvFileSize
 id tvLivePreviewBadge
 id tvMusicStyle
 id tvPhotoHint
@@ -145,15 +153,19 @@ id tvTemplateCount
 id tvTemplateDuration
 id tvTemplateName
 id tvTemplateTeluguName
+id tvVideoDate
+id tvVideoName
 id tvVideosCount
 layout activity_main
 layout activity_splash
 layout fragment_editor
 layout fragment_home
+layout fragment_my_videos
 layout fragment_premium
 layout fragment_preview
 layout fragment_template_list
 layout item_category
+layout item_my_video
 layout item_template
 menu bottom_nav_menu
 mipmap ic_launcher
@@ -166,6 +178,7 @@ string choose_category
 string create_video
 string error_export_failed
 string error_name_required
+string export_in_progress
 string gcm_defaultSenderId
 string go_premium
 string google_api_key
@@ -180,9 +193,12 @@ string hint_village_name
 string home_hero_subtitle
 string home_hero_title
 string music_style
+string my_videos
 string nav_home
+string nav_my_videos
 string nav_premium
 string nav_templates
+string no_videos_yet
 string photo_hint
 string premium_features
 string preview_video

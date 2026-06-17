@@ -10,7 +10,10 @@ class StatusMakerApp : Application() {
         super.onCreate()
         instance = this
         MobileAds.initialize(this) {
-            AdManager.getInstance(this).preloadAds()
+            // FIX: route through onSdkInitialized() so AdManager knows the
+            // SDK is actually ready, and flushes any banner loads that were
+            // requested before this callback fired.
+            AdManager.getInstance(this).onSdkInitialized()
         }
     }
 

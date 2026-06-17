@@ -61,7 +61,13 @@ class HomeFragment : Fragment() {
             setAdSize(AdSize.BANNER)
         }
         binding.bannerAdContainer.addView(adView)
-        AdManager.getInstance(requireContext()).loadBannerAd(adView)
+        // FIX: hide the container on failure instead of leaving an empty
+        // gap with no feedback; show it again if a later retry succeeds.
+        AdManager.getInstance(requireContext()).loadBannerAd(
+            adView,
+            onLoaded = { binding.bannerAdContainer.visibility = View.VISIBLE },
+            onFailed = { binding.bannerAdContainer.visibility = View.GONE }
+        )
     }
 
     private fun observeViewModel() {

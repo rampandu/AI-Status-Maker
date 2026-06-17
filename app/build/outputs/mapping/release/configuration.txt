@@ -262,6 +262,8 @@
 
 -keep class com.statusmaker.videoapp.ui.home.HomeFragment { <init>(...); }
 
+-keep class com.statusmaker.videoapp.ui.myvideos.MyVideosFragment { <init>(...); }
+
 -keep class com.statusmaker.videoapp.ui.premium.PremiumFragment { <init>(...); }
 
 -keep class com.statusmaker.videoapp.ui.preview.PreviewFragment { <init>(...); }

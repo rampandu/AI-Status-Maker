@@ -125,7 +125,15 @@ class PreviewFragment : Fragment() {
         binding.btnExport.setOnClickListener      { showRewardedAdThenExport() }
         binding.btnWhatsApp.setOnClickListener    { exportedFilePath?.let { shareToWhatsApp(it) } ?: notExportedYet() }
         binding.btnShare.setOnClickListener       { exportedFilePath?.let { shareVideo(it) }      ?: notExportedYet() }
-        binding.btnEditAgain.setOnClickListener   { findNavController().navigateUp() }
+        binding.btnEditAgain.setOnClickListener {
+            // FIX: interstitial was defined in AdManager but never called
+            // anywhere in the app. This is a natural, non-intrusive spot —
+            // a content break between finishing one video and starting
+            // the next. The 3-min cooldown in AdManager prevents spam.
+            AdManager.getInstance(requireContext()).showInterstitialAd(requireActivity()) {
+                findNavController().navigateUp()
+            }
+        }
     }
 
     private fun notExportedYet() =

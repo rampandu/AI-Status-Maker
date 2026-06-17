@@ -44,6 +44,10 @@
         "source": "com.statusmaker.videoapp-main-75:/drawable/bg_category_badge.xml"
     },
     {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/drawable_ic_video_library.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/drawable/ic_video_library.xml"
+    },
+    {
         "merged": "com.statusmaker.videoapp-merged_res-73:/drawable_thumb_diwali.xml.flat",
         "source": "com.statusmaker.videoapp-main-75:/drawable/thumb_diwali.xml"
     },
@@ -256,6 +260,10 @@
         "source": "com.statusmaker.videoapp-main-75:/drawable/ic_share.xml"
     },
     {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/layout_fragment_my_videos.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/layout/fragment_my_videos.xml"
+    },
+    {
         "merged": "com.statusmaker.videoapp-merged_res-73:/layout_item_category.xml.flat",
         "source": "com.statusmaker.videoapp-main-75:/layout/item_category.xml"
     },
@@ -290,6 +298,10 @@
     {
         "merged": "com.statusmaker.videoapp-merged_res-73:/drawable_thumb_balaji.xml.flat",
         "source": "com.statusmaker.videoapp-main-75:/drawable/thumb_balaji.xml"
+    },
+    {
+        "merged": "com.statusmaker.videoapp-merged_res-73:/layout_item_my_video.xml.flat",
+        "source": "com.statusmaker.videoapp-main-75:/layout/item_my_video.xml"
     },
     {
         "merged": "com.statusmaker.videoapp-merged_res-73:/mipmap-xhdpi_ic_launcher_round.png.flat",

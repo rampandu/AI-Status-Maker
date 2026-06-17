@@ -13,7 +13,7 @@ class AdManager private constructor(private val context: Context) {
 
     companion object {
         private const val TAG = "AdManager"
-        private const val INTERSTITIAL_COOLDOWN_MS = 3 * 60 * 1000L // 3 min between interstitials
+        private const val INTERSTITIAL_COOLDOWN_MS = 3 * 60 * 1000L
 
         // ── Replace these with real Ad Unit IDs before release ───────────────
         const val BANNER_AD_UNIT   = "ca-app-pub-3940256099942544/6300978111"
@@ -31,6 +31,20 @@ class AdManager private constructor(private val context: Context) {
     private var interstitialAd: InterstitialAd? = null
     private var isRewardedLoading = false
     private var lastInterstitialTime = 0L
+
+    // FIX: track whether MobileAds.initialize() has actually completed.
+    // Loading ads before this is done is a common cause of silent failures.
+    @Volatile private var isSdkInitialized = false
+    private val pendingBannerLoads = mutableListOf<AdView>()
+
+    fun onSdkInitialized() {
+        isSdkInitialized = true
+        Log.d(TAG, "AdMob SDK initialized")
+        preloadAds()
+        // Flush any banners that tried to load before init finished
+        pendingBannerLoads.forEach { it.loadAd(AdRequest.Builder().build()) }
+        pendingBannerLoads.clear()
+    }
 
     fun preloadAds() {
         loadRewardedAd()
@@ -50,17 +64,13 @@ class AdManager private constructor(private val context: Context) {
                 }
                 override fun onAdFailedToLoad(error: LoadAdError) {
                     rewardedAd = null; isRewardedLoading = false
-                    Log.w(TAG, "Rewarded failed: ${error.message}")
+                    Log.w(TAG, "Rewarded failed [${error.code}]: ${error.message}")
                 }
             })
     }
 
     fun isRewardedAdReady() = rewardedAd != null
 
-    /**
-     * FIX #1: reward flag is set inside the reward callback, then checked in
-     * onAdDismissedFullScreenContent — this correctly distinguishes watched vs skipped.
-     */
     fun showRewardedAd(
         activity: Activity,
         onRewarded: () -> Unit,
@@ -73,16 +83,16 @@ class AdManager private constructor(private val context: Context) {
             return
         }
 
-        var rewarded = false  // FIX: track reward inside this scope
+        var rewarded = false
 
         ad.fullScreenContentCallback = object : FullScreenContentCallback() {
             override fun onAdDismissedFullScreenContent() {
                 rewardedAd = null
                 loadRewardedAd()
-                // Called AFTER reward callback (if rewarded), so flag is correct
                 if (rewarded) onRewarded() else onAdSkipped()
             }
             override fun onAdFailedToShowFullScreenContent(e: AdError) {
+                Log.w(TAG, "Rewarded failed to show: ${e.message}")
                 rewardedAd = null; loadRewardedAd(); onAdNotAvailable()
             }
         }
@@ -95,25 +105,35 @@ class AdManager private constructor(private val context: Context) {
     fun loadInterstitialAd() {
         InterstitialAd.load(context, INTERSTITIAL_ID, AdRequest.Builder().build(),
             object : InterstitialAdLoadCallback() {
-                override fun onAdLoaded(ad: InterstitialAd) { interstitialAd = ad }
-                override fun onAdFailedToLoad(e: LoadAdError) { interstitialAd = null }
+                override fun onAdLoaded(ad: InterstitialAd) {
+                    interstitialAd = ad
+                    Log.d(TAG, "Interstitial loaded")
+                }
+                override fun onAdFailedToLoad(e: LoadAdError) {
+                    interstitialAd = null
+                    Log.w(TAG, "Interstitial failed [${e.code}]: ${e.message}")
+                }
             })
     }
 
-    /**
-     * FIX #15: cooldown guard — shows at most once every 3 minutes.
-     */
+    fun isInterstitialReady() = interstitialAd != null
+
     fun showInterstitialAd(activity: Activity, onDismissed: () -> Unit = {}) {
         val now = System.currentTimeMillis()
         if (now - lastInterstitialTime < INTERSTITIAL_COOLDOWN_MS) {
+            Log.d(TAG, "Interstitial skipped (cooldown active)")
             onDismissed(); return
         }
-        val ad = interstitialAd ?: run { onDismissed(); loadInterstitialAd(); return }
+        val ad = interstitialAd ?: run {
+            Log.d(TAG, "Interstitial not ready, skipping this time")
+            onDismissed(); loadInterstitialAd(); return
+        }
         ad.fullScreenContentCallback = object : FullScreenContentCallback() {
             override fun onAdDismissedFullScreenContent() {
                 interstitialAd = null; loadInterstitialAd(); onDismissed()
             }
             override fun onAdFailedToShowFullScreenContent(e: AdError) {
+                Log.w(TAG, "Interstitial failed to show: ${e.message}")
                 interstitialAd = null; onDismissed()
             }
         }
@@ -123,7 +143,32 @@ class AdManager private constructor(private val context: Context) {
 
     // ── Banner ────────────────────────────────────────────────────────────────
 
-    fun loadBannerAd(adView: com.google.android.gms.ads.AdView) {
+    /**
+     * FIX: previously this had no listener at all, so a failed banner load
+     * (no fill, network error, SDK not ready) was completely silent — the
+     * container just stayed empty with zero diagnostic info.
+     *
+     * Now: logs every outcome, and if the SDK hasn't finished initializing
+     * yet, the load is queued instead of fired immediately (which can fail
+     * silently on some SDK versions if called too early).
+     */
+    fun loadBannerAd(adView: AdView, onLoaded: () -> Unit = {}, onFailed: (String) -> Unit = {}) {
+        adView.adListener = object : AdListener() {
+            override fun onAdLoaded() {
+                Log.d(TAG, "Banner loaded")
+                onLoaded()
+            }
+            override fun onAdFailedToLoad(error: LoadAdError) {
+                Log.w(TAG, "Banner failed [${error.code}]: ${error.message} (domain=${error.domain})")
+                onFailed(error.message)
+            }
+        }
+
+        if (!isSdkInitialized) {
+            Log.d(TAG, "SDK not ready yet — queuing banner load")
+            pendingBannerLoads.add(adView)
+            return
+        }
         adView.loadAd(AdRequest.Builder().build())
     }
 }
