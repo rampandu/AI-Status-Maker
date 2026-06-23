@@ -30,7 +30,7 @@ class AdManager private constructor(private val context: Context) {
         // App Open ad unit — create this in AdMob console (Ad format: App Open)
         // and replace before release. Using Google's public test unit for now
         // so the flow can be verified before the real unit is approved.
-        const val APP_OPEN_AD_UNIT  = "ca-app-pub-3940256099942544/9257395921"
+        const val APP_OPEN_AD_UNIT  = "ca-app-pub-9535310271167305/8281894822"
 
         @Volatile private var instance: AdManager? = null
         fun getInstance(context: Context): AdManager =
