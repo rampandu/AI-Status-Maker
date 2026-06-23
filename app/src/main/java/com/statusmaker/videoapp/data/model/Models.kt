@@ -17,7 +17,19 @@ enum class TemplateCategory(
     POLITICAL("Political", "రాజకీయం", "🗳️"),
     BABY("Baby Welcome", "శిశువు స్వాగతం", "👶"),
     WEDDING("Wedding", "వివాహం", "💍"),
-    BUSINESS("Business", "వ్యాపారం", "🏪");
+    BUSINESS("Business", "వ్యాపారం", "🏪"),
+
+    // ── Quote/mood categories — daily-status content, Crafto-style ───────────
+    GOOD_MORNING("Good Morning", "శుభోదయం", "🌅"),
+    GOOD_NIGHT("Good Night", "శుభరాత్రి", "🌙"),
+    LOVE("Love", "ప్రేమ", "❤️"),
+    FRIENDSHIP("Friendship", "మిత్రత్వం", "🤝"),
+    ATTITUDE("Attitude", "అటిట్యూడ్", "🔥"),
+    MOTIVATIONAL("Motivational", "ప్రేరణ", "💪");
+
+    /** True for the daily quote-style categories (text-forward, no festival/business fields). */
+    val isQuoteMood: Boolean
+        get() = this in setOf(GOOD_MORNING, GOOD_NIGHT, LOVE, FRIENDSHIP, ATTITUDE, MOTIVATIONAL)
 }
 
 // ─── Template ─────────────────────────────────────────────────────────────────
@@ -65,6 +77,22 @@ data class Project(
     val createdAt: Long = System.currentTimeMillis(),
     val isShared: Boolean = false
 ) : Serializable
+
+// ─── Category Section (Home discovery feed grouping — not persisted) ─────────
+
+data class CategorySection(
+    val category: TemplateCategory,
+    val templates: List<Template>
+)
+
+// ─── Favorite Template (Room Entity) ──────────────────────────────────────────
+
+@Entity(tableName = "favorite_templates")
+data class FavoriteTemplate(
+    @PrimaryKey
+    val templateId: String,
+    val addedAt: Long = System.currentTimeMillis()
+)
 
 // ─── Enums ────────────────────────────────────────────────────────────────────
 

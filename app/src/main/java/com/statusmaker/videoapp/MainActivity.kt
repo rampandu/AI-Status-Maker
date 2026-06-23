@@ -15,7 +15,7 @@ class MainActivity : AppCompatActivity() {
 
     private val bottomNavDestinations = setOf(
         R.id.homeFragment,
-        R.id.templateListFragment,
+        R.id.favoritesFragment,
         R.id.myVideosFragment,
         R.id.premiumFragment
     )

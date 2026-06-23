@@ -5,11 +5,13 @@ import com.statusmaker.videoapp.R
 import com.statusmaker.videoapp.data.db.AppDatabase
 import com.statusmaker.videoapp.data.model.*
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 class TemplateRepository(private val context: Context) {
 
     private val db = AppDatabase.getInstance(context)
     private val dao = db.projectDao()
+    private val favoriteDao = db.favoriteDao()
 
     fun getAllProjects(): Flow<List<Project>> = dao.getAllProjects()
     suspend fun saveProject(project: Project): Long = dao.insert(project)
@@ -22,6 +24,37 @@ class TemplateRepository(private val context: Context) {
     fun getTemplateById(id: String): Template? = TEMPLATES.find { it.id == id }
     fun getFreeTemplates(): List<Template> = TEMPLATES.filter { !it.isPremium }
     fun getPremiumTemplates(): List<Template> = TEMPLATES.filter { it.isPremium }
+
+    fun searchTemplates(query: String): List<Template> {
+        if (query.isBlank()) return TEMPLATES
+        val q = query.trim().lowercase()
+        return TEMPLATES.filter {
+            it.name.lowercase().contains(q) ||
+            it.teluguName.contains(query.trim()) ||
+            it.category.displayName.lowercase().contains(q)
+        }
+    }
+
+    /** One section per category that has at least one template, in enum declaration order. */
+    fun getCategorySections(): List<CategorySection> =
+        TemplateCategory.values()
+            .map { cat -> CategorySection(cat, getTemplatesByCategory(cat)) }
+            .filter { it.templates.isNotEmpty() }
+
+    // ── Favorites ──────────────────────────────────────────────────────────────
+
+    fun isFavorite(templateId: String): Flow<Boolean> = favoriteDao.isFavorite(templateId)
+
+    fun getFavoriteIdsFlow(): Flow<Set<String>> =
+        favoriteDao.getAllFavoriteIds().map { it.toSet() }
+
+    fun getFavoriteTemplates(): Flow<List<Template>> =
+        favoriteDao.getAllFavoriteIds().map { ids -> TEMPLATES.filter { it.id in ids } }
+
+    suspend fun toggleFavorite(templateId: String, currentlyFavorite: Boolean) {
+        if (currentlyFavorite) favoriteDao.remove(templateId)
+        else favoriteDao.add(FavoriteTemplate(templateId))
+    }
 
     companion object {
         val TEMPLATES = listOf(
@@ -363,6 +396,174 @@ class TemplateRepository(private val context: Context) {
                 primaryColor = "#004D40",
                 accentColor = "#B2DFDB",
                 animationStyle = AnimationStyle.SLIDE
+            ),
+
+            // ── Good Morning ────────────────────────────────────────────────
+            Template(
+                id = "morning_sunrise",
+                name = "Rise with the sun, shine with your soul.",
+                teluguName = "సూర్యునితో మేల్కో, మీ ఆత్మతో వెలుగు.",
+                category = TemplateCategory.GOOD_MORNING,
+                thumbnailResId = R.drawable.thumb_morning_sunrise,
+                durationSeconds = 15,
+                isPremium = false,
+                musicStyle = MusicStyle.INSTRUMENTAL,
+                primaryColor = "#FFA94D",
+                accentColor = "#FFE08A",
+                animationStyle = AnimationStyle.SLIDE
+            ),
+            Template(
+                id = "morning_chai",
+                name = "A fresh morning, a fresh chance to smile.",
+                teluguName = "కొత్త ఉదయం, నవ్వడానికి కొత్త అవకాశం.",
+                category = TemplateCategory.GOOD_MORNING,
+                thumbnailResId = R.drawable.thumb_morning_chai,
+                durationSeconds = 15,
+                isPremium = true,
+                musicStyle = MusicStyle.CLASSICAL,
+                primaryColor = "#FF9F45",
+                accentColor = "#FFD9A0",
+                animationStyle = AnimationStyle.FADE
+            ),
+
+            // ── Good Night ──────────────────────────────────────────────────
+            Template(
+                id = "night_stars",
+                name = "Let go of today, the stars will hold your dreams.",
+                teluguName = "ఈ రోజును వదిలేయండి, నక్షత్రాలు మీ కలలను పట్టుకుంటాయి.",
+                category = TemplateCategory.GOOD_NIGHT,
+                thumbnailResId = R.drawable.thumb_night_stars,
+                durationSeconds = 15,
+                isPremium = false,
+                musicStyle = MusicStyle.INSTRUMENTAL,
+                primaryColor = "#6B5FD9",
+                accentColor = "#8A7FF0",
+                animationStyle = AnimationStyle.FADE
+            ),
+            Template(
+                id = "night_moon",
+                name = "Rest well, tomorrow is already smiling at you.",
+                teluguName = "బాగా విశ్రాంతి తీసుకోండి, రేపు మీవైపు నవ్వుతోంది.",
+                category = TemplateCategory.GOOD_NIGHT,
+                thumbnailResId = R.drawable.thumb_night_moon,
+                durationSeconds = 15,
+                isPremium = true,
+                musicStyle = MusicStyle.DEVOTIONAL,
+                primaryColor = "#3D3590",
+                accentColor = "#5A6FD9",
+                animationStyle = AnimationStyle.FADE
+            ),
+
+            // ── Love ────────────────────────────────────────────────────────
+            Template(
+                id = "love_heart",
+                name = "Some hearts just know how to find each other.",
+                teluguName = "కొన్ని హృదయాలు ఒకదానికొకటి కనుగొనడం తెలుసు.",
+                category = TemplateCategory.LOVE,
+                thumbnailResId = R.drawable.thumb_love_heart,
+                durationSeconds = 15,
+                isPremium = false,
+                musicStyle = MusicStyle.CLASSICAL,
+                primaryColor = "#FF4D6D",
+                accentColor = "#FF8FA8",
+                animationStyle = AnimationStyle.ZOOM
+            ),
+            Template(
+                id = "love_roses",
+                name = "Every little moment with you feels like home.",
+                teluguName = "నీతో గడిపే ప్రతి క్షణం ఇంటిలా అనిపిస్తుంది.",
+                category = TemplateCategory.LOVE,
+                thumbnailResId = R.drawable.thumb_love_roses,
+                durationSeconds = 15,
+                isPremium = true,
+                musicStyle = MusicStyle.INSTRUMENTAL,
+                primaryColor = "#E0577E",
+                accentColor = "#FFB3C6",
+                animationStyle = AnimationStyle.FADE
+            ),
+
+            // ── Friendship ──────────────────────────────────────────────────
+            Template(
+                id = "friend_squad",
+                name = "Real friends don't need everyday calls to stay close.",
+                teluguName = "నిజమైన మిత్రులకు దగ్గరగా ఉండటానికి ప్రతిరోజు కాల్స్ అవసరం లేదు.",
+                category = TemplateCategory.FRIENDSHIP,
+                thumbnailResId = R.drawable.thumb_friend_squad,
+                durationSeconds = 15,
+                isPremium = false,
+                musicStyle = MusicStyle.FOLK,
+                primaryColor = "#22D3EE",
+                accentColor = "#9EF0FF",
+                animationStyle = AnimationStyle.SPARKLE
+            ),
+            Template(
+                id = "friend_bond",
+                name = "Good friends are the family we choose for ourselves.",
+                teluguName = "మంచి మిత్రులు మనం ఎంచుకున్న కుటుంబం.",
+                category = TemplateCategory.FRIENDSHIP,
+                thumbnailResId = R.drawable.thumb_friend_bond,
+                durationSeconds = 15,
+                isPremium = false,
+                musicStyle = MusicStyle.FILMY,
+                primaryColor = "#22B8CE",
+                accentColor = "#7FE0E8",
+                animationStyle = AnimationStyle.FADE
+            ),
+
+            // ── Attitude ────────────────────────────────────────────────────
+            Template(
+                id = "attitude_fire",
+                name = "I don't chase, I attract. What's meant to be will be.",
+                teluguName = "నేను వెంబడించను, ఆకర్షిస్తాను. జరగాల్సింది జరుగుతుంది.",
+                category = TemplateCategory.ATTITUDE,
+                thumbnailResId = R.drawable.thumb_attitude_fire,
+                durationSeconds = 15,
+                isPremium = false,
+                musicStyle = MusicStyle.FILMY,
+                primaryColor = "#C026D3",
+                accentColor = "#F08AF0",
+                animationStyle = AnimationStyle.ZOOM
+            ),
+            Template(
+                id = "attitude_bold",
+                name = "Silence is my reply when words are not worth it.",
+                teluguName = "మాటలు అవసరం లేనప్పుడు మౌనమే నా సమాధానం.",
+                category = TemplateCategory.ATTITUDE,
+                thumbnailResId = R.drawable.thumb_attitude_bold,
+                durationSeconds = 15,
+                isPremium = true,
+                musicStyle = MusicStyle.FILMY,
+                primaryColor = "#1F1428",
+                accentColor = "#C026D3",
+                animationStyle = AnimationStyle.SLIDE
+            ),
+
+            // ── Motivational ────────────────────────────────────────────────
+            Template(
+                id = "motivation_rise",
+                name = "Every sunrise is a new page — write something good.",
+                teluguName = "ప్రతి సూర్యోదయం ఒక కొత్త పేజీ — మంచిది రాయండి.",
+                category = TemplateCategory.MOTIVATIONAL,
+                thumbnailResId = R.drawable.thumb_motivation_rise,
+                durationSeconds = 15,
+                isPremium = false,
+                musicStyle = MusicStyle.INSTRUMENTAL,
+                primaryColor = "#FFD23F",
+                accentColor = "#FFEB9C",
+                animationStyle = AnimationStyle.SLIDE
+            ),
+            Template(
+                id = "motivation_grind",
+                name = "Small steps every day still take you the whole way.",
+                teluguName = "ప్రతిరోజు చిన్న అడుగులు అయినా మిమ్మల్ని పూర్తి దూరం తీసుకెళ్తాయి.",
+                category = TemplateCategory.MOTIVATIONAL,
+                thumbnailResId = R.drawable.thumb_motivation_grind,
+                durationSeconds = 15,
+                isPremium = true,
+                musicStyle = MusicStyle.CLASSICAL,
+                primaryColor = "#F2B705",
+                accentColor = "#FFE066",
+                animationStyle = AnimationStyle.ZOOM
             )
         )
     }

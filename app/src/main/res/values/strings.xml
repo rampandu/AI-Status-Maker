@@ -34,6 +34,7 @@
     <!-- Bottom Nav -->
     <string name="nav_home">Home</string>
     <string name="nav_templates">Templates</string>
+    <string name="nav_favorites">Favorites</string>
     <string name="nav_premium">Premium</string>
     <string name="my_videos">My Videos</string>
     <string name="nav_my_videos">My Videos</string>

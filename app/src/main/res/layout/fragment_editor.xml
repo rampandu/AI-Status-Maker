@@ -181,71 +181,83 @@
                     android:textColor="@color/text_primary" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Village Name -->
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            <!-- Village / Business / Festival fields — only relevant for the
+                 occasion-style templates, hidden for quote-mood templates
+                 (Good Morning, Love, etc.) where only Photo + Name + the
+                 quote text itself matter. -->
+            <LinearLayout
+                android:id="@+id/occasionFieldsGroup"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                android:hint="@string/hint_village_name"
-                app:boxCornerRadiusTopStart="@dimen/radius_sm"
-                app:boxCornerRadiusTopEnd="@dimen/radius_sm"
-                app:boxCornerRadiusBottomStart="@dimen/radius_sm"
-                app:boxCornerRadiusBottomEnd="@dimen/radius_sm"
-                app:boxStrokeColor="@color/accent_gold"
-                app:hintTextColor="@color/text_secondary">
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etVillageName"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="textCapWords"
-                    android:textColor="@color/text_primary" />
-            </com.google.android.material.textfield.TextInputLayout>
+                android:orientation="vertical">
 
-            <!-- Business Name -->
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                android:hint="@string/hint_business_name"
-                app:boxCornerRadiusTopStart="@dimen/radius_sm"
-                app:boxCornerRadiusTopEnd="@dimen/radius_sm"
-                app:boxCornerRadiusBottomStart="@dimen/radius_sm"
-                app:boxCornerRadiusBottomEnd="@dimen/radius_sm"
-                app:boxStrokeColor="@color/accent_gold"
-                app:hintTextColor="@color/text_secondary">
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etBusinessName"
+                <!-- Village Name -->
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textCapWords"
-                    android:textColor="@color/text_primary" />
-            </com.google.android.material.textfield.TextInputLayout>
+                    android:layout_marginBottom="12dp"
+                    android:hint="@string/hint_village_name"
+                    app:boxCornerRadiusTopStart="@dimen/radius_sm"
+                    app:boxCornerRadiusTopEnd="@dimen/radius_sm"
+                    app:boxCornerRadiusBottomStart="@dimen/radius_sm"
+                    app:boxCornerRadiusBottomEnd="@dimen/radius_sm"
+                    app:boxStrokeColor="@color/accent_gold"
+                    app:hintTextColor="@color/text_secondary">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etVillageName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textCapWords"
+                        android:textColor="@color/text_primary" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Festival Name (AutoComplete) -->
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                android:hint="@string/hint_festival_name"
-                app:boxCornerRadiusTopStart="@dimen/radius_sm"
-                app:boxCornerRadiusTopEnd="@dimen/radius_sm"
-                app:boxCornerRadiusBottomStart="@dimen/radius_sm"
-                app:boxCornerRadiusBottomEnd="@dimen/radius_sm"
-                app:boxStrokeColor="@color/accent_gold"
-                app:hintTextColor="@color/text_secondary">
-                <AutoCompleteTextView
-                    android:id="@+id/actvFestivalName"
+                <!-- Business Name -->
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textCapWords"
-                    android:textColor="@color/text_primary" />
-            </com.google.android.material.textfield.TextInputLayout>
+                    android:layout_marginBottom="12dp"
+                    android:hint="@string/hint_business_name"
+                    app:boxCornerRadiusTopStart="@dimen/radius_sm"
+                    app:boxCornerRadiusTopEnd="@dimen/radius_sm"
+                    app:boxCornerRadiusBottomStart="@dimen/radius_sm"
+                    app:boxCornerRadiusBottomEnd="@dimen/radius_sm"
+                    app:boxStrokeColor="@color/accent_gold"
+                    app:hintTextColor="@color/text_secondary">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etBusinessName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textCapWords"
+                        android:textColor="@color/text_primary" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Festival Name (AutoComplete) -->
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    android:hint="@string/hint_festival_name"
+                    app:boxCornerRadiusTopStart="@dimen/radius_sm"
+                    app:boxCornerRadiusTopEnd="@dimen/radius_sm"
+                    app:boxCornerRadiusBottomStart="@dimen/radius_sm"
+                    app:boxCornerRadiusBottomEnd="@dimen/radius_sm"
+                    app:boxStrokeColor="@color/accent_gold"
+                    app:hintTextColor="@color/text_secondary">
+                    <AutoCompleteTextView
+                        android:id="@+id/actvFestivalName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textCapWords"
+                        android:textColor="@color/text_primary" />
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
 
             <!-- Custom Message -->
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilCustomMessage"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

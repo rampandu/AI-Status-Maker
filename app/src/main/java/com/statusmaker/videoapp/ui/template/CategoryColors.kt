@@ -18,6 +18,12 @@ fun TemplateCategory.accentColorRes(): Int = when (this) {
     TemplateCategory.BABY       -> R.color.cat_baby
     TemplateCategory.WEDDING    -> R.color.cat_wedding
     TemplateCategory.BUSINESS   -> R.color.cat_business
+    TemplateCategory.GOOD_MORNING -> R.color.cat_good_morning
+    TemplateCategory.GOOD_NIGHT   -> R.color.cat_good_night
+    TemplateCategory.LOVE         -> R.color.cat_love
+    TemplateCategory.FRIENDSHIP   -> R.color.cat_friendship
+    TemplateCategory.ATTITUDE     -> R.color.cat_attitude
+    TemplateCategory.MOTIVATIONAL -> R.color.cat_motivational
 }
 
 fun TemplateCategory.accentColor(context: Context): Int =

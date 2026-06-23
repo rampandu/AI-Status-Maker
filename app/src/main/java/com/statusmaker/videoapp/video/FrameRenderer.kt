@@ -43,6 +43,10 @@ object FrameRenderer {
                 drawWeddingFrame(canvas, template, userInput, userPhoto, t, width, height)
             TemplateCategory.BUSINESS ->
                 drawBusinessFrame(canvas, template, userInput, userPhoto, t, width, height)
+            TemplateCategory.GOOD_MORNING, TemplateCategory.GOOD_NIGHT,
+            TemplateCategory.LOVE, TemplateCategory.FRIENDSHIP,
+            TemplateCategory.ATTITUDE, TemplateCategory.MOTIVATIONAL ->
+                drawQuoteMoodFrame(canvas, template, userInput, userPhoto, t, width, height)
         }
 
         if (addWatermark) drawWatermark(canvas, width, height)
@@ -437,6 +441,121 @@ object FrameRenderer {
         }
 
         drawDecorativeBorder(canvas, Color.parseColor(template.accentColor), w, h)
+    }
+
+    // ─── Quote Mood Frame (Good Morning / Good Night / Love / Friendship / Attitude / Motivational) ──
+    // Crafto-style layout: large centered quote dominates the frame, small
+    // avatar + name signature sits near the bottom rather than a big photo
+    // dominating the center — a deliberately different composition from the
+    // festival/birthday templates above, matching how daily-quote apps
+    // actually lay out a personalized status card.
+
+    private fun drawQuoteMoodFrame(
+        canvas: Canvas,
+        template: Template,
+        userInput: UserInput,
+        photo: Bitmap?,
+        t: Float,
+        w: Int, h: Int
+    ) {
+        drawGradientBg(canvas, template.primaryColor, "#0A0A16", w, h, t, rotate = true)
+
+        val accent = Color.parseColor(template.accentColor)
+        when (template.category) {
+            TemplateCategory.GOOD_MORNING -> drawLightRays(canvas, t, w, h, accent)
+            TemplateCategory.GOOD_NIGHT   -> drawGlowCircles(canvas, t, w, h, accent)
+            TemplateCategory.LOVE         -> drawRosePetals(canvas, t, w, h)
+            TemplateCategory.FRIENDSHIP   -> drawBubbles(canvas, t, w, h, accent)
+            TemplateCategory.ATTITUDE     -> drawConfetti(canvas, t, w, h)
+            TemplateCategory.MOTIVATIONAL -> drawGlowCircles(canvas, t, w, h, accent)
+            else -> {}
+        }
+
+        // Decorative opening quote mark
+        drawStyledText(canvas, "❝", w * 0.16f, h * 0.20f, w * 0.13f, accent.withAlpha(170))
+
+        // The quote itself — user's custom message overrides the template's
+        // built-in line if they typed one; otherwise the template's own
+        // Telugu line is the quote (with the English version as a subtitle).
+        val usingCustom = userInput.customMessage.isNotEmpty()
+        val quoteTe = if (usingCustom) userInput.customMessage else template.teluguName
+        val fadeIn = (easeInOut(min(t * 2.2f, 1f)) * 255).toInt().coerceIn(0, 255)
+
+        drawWrappedQuoteText(
+            canvas, quoteTe,
+            cx = w / 2f, cy = h * 0.40f,
+            maxWidth = w * 0.82f,
+            textSize = w * 0.062f,
+            color = Color.WHITE.withAlpha(fadeIn),
+            maxLines = 4
+        )
+
+        if (!usingCustom) {
+            drawWrappedQuoteText(
+                canvas, template.name,
+                cx = w / 2f, cy = h * 0.62f,
+                maxWidth = w * 0.78f,
+                textSize = w * 0.036f,
+                color = accent.withAlpha((fadeIn * 0.85f).toInt()),
+                maxLines = 2
+            )
+        }
+
+        // Small avatar + name signature near the bottom, Crafto-style
+        val sigY = h * 0.85f
+        drawCircularPhoto(canvas, photo, w * 0.20f, sigY, w * 0.11f, accent, borderWidth = 4f)
+        drawStyledText(
+            canvas, "— " + userInput.personName.ifEmpty { "Your Name" },
+            w * 0.60f, sigY + w * 0.015f,
+            w * 0.045f, Color.WHITE, bold = true
+        )
+
+        drawDecorativeBorder(canvas, accent, w, h)
+    }
+
+    /** Centered, word-wrapped multi-line text — existing drawStyledText is single-line only. */
+    private fun drawWrappedQuoteText(
+        canvas: Canvas,
+        text: String,
+        cx: Float, cy: Float,
+        maxWidth: Float,
+        textSize: Float,
+        color: Int,
+        maxLines: Int
+    ) {
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            this.textSize = textSize
+            this.color = color
+            typeface = Typeface.DEFAULT_BOLD
+            textAlign = Paint.Align.CENTER
+            setShadowLayer(8f, 0f, 4f, Color.BLACK.withAlpha(160))
+        }
+
+        val words = text.split(" ")
+        val lines = mutableListOf<String>()
+        var current = StringBuilder()
+        for (word in words) {
+            val candidate = if (current.isEmpty()) word else "${current} $word"
+            if (paint.measureText(candidate) <= maxWidth) {
+                current = StringBuilder(candidate)
+            } else {
+                if (current.isNotEmpty()) lines.add(current.toString())
+                current = StringBuilder(word)
+            }
+        }
+        if (current.isNotEmpty()) lines.add(current.toString())
+
+        val shown = if (lines.size > maxLines) {
+            lines.take(maxLines - 1) + (lines.drop(maxLines - 1).joinToString(" ").let {
+                if (it.length > 40) it.take(37) + "…" else it
+            })
+        } else lines
+
+        val lineHeight = textSize * 1.25f
+        val startY = cy - (shown.size - 1) * lineHeight / 2f
+        shown.forEachIndexed { i, line ->
+            canvas.drawText(line, cx, startY + i * lineHeight, paint)
+        }
     }
 
     // ─── Business Frame ───────────────────────────────────────────────────────

@@ -3,9 +3,9 @@
     <item android:id="@+id/homeFragment"
         android:icon="@drawable/ic_home"
         android:title="@string/nav_home" />
-    <item android:id="@+id/templateListFragment"
-        android:icon="@drawable/ic_templates"
-        android:title="@string/nav_templates" />
+    <item android:id="@+id/favoritesFragment"
+        android:icon="@drawable/ic_heart_outline"
+        android:title="@string/nav_favorites" />
     <item android:id="@+id/myVideosFragment"
         android:icon="@drawable/ic_video_library"
         android:title="My Videos" />

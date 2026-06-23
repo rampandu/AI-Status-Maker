@@ -3,9 +3,9 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/templateContainer"
-    android:layout_width="match_parent"
+    android:layout_width="138dp"
     android:layout_height="wrap_content"
-    android:layout_margin="6dp"
+    android:layout_margin="5dp"
     android:clickable="true"
     android:focusable="true"
     android:foreground="@drawable/fg_card_ripple"
@@ -22,7 +22,7 @@
 
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="160dp">
+            android:layout_height="138dp">
 
             <ImageView
                 android:id="@+id/ivTemplateThumbnail"
@@ -38,28 +38,26 @@
 
             <ImageView
                 android:id="@+id/ivFavorite"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
                 android:layout_gravity="top|start"
-                android:layout_margin="6dp"
-                android:padding="6dp"
+                android:layout_margin="4dp"
+                android:padding="5dp"
                 android:src="@drawable/ic_heart_outline"
-                android:contentDescription="Add to favorites"
-                android:background="@drawable/fg_card_ripple" />
+                android:contentDescription="Add to favorites" />
 
             <TextView
                 android:id="@+id/ivPremiumBadge"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="top|end"
-                android:layout_margin="8dp"
+                android:layout_margin="6dp"
                 android:background="@drawable/bg_premium_badge"
-                android:paddingHorizontal="8dp"
-                android:paddingVertical="3dp"
-                android:text="⭐ PRO"
+                android:paddingHorizontal="6dp"
+                android:paddingVertical="2dp"
+                android:text="⭐"
                 android:textColor="@color/bg_dark"
-                android:textSize="10sp"
-                android:fontFamily="sans-serif-medium"
+                android:textSize="9sp"
                 android:textStyle="bold"
                 android:visibility="gone" />
 
@@ -68,29 +66,28 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom|start"
-                android:layout_margin="8dp"
+                android:layout_margin="6dp"
                 android:background="@drawable/bg_duration_pill"
-                android:paddingHorizontal="8dp"
-                android:paddingVertical="3dp"
+                android:paddingHorizontal="6dp"
+                android:paddingVertical="2dp"
                 android:textColor="@color/white"
-                android:textSize="11sp"
-                android:fontFamily="sans-serif-medium" />
+                android:textSize="9sp" />
         </FrameLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="10dp">
+            android:padding="8dp">
 
             <TextView
                 android:id="@+id/tvTemplateName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="@color/text_primary"
-                android:textSize="13sp"
+                android:textSize="11sp"
                 android:fontFamily="sans-serif-medium"
-                android:maxLines="1"
+                android:maxLines="2"
                 android:ellipsize="end" />
 
             <TextView
@@ -98,7 +95,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="@color/text_secondary"
-                android:textSize="11sp"
+                android:textSize="9sp"
                 android:maxLines="1"
                 android:ellipsize="end" />
 
@@ -106,10 +103,9 @@
                 android:id="@+id/tvMusicStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
+                android:layout_marginTop="3dp"
                 android:textColor="@color/accent_gold"
-                android:textSize="10sp"
-                android:fontFamily="sans-serif-medium" />
+                android:textSize="9sp" />
         </LinearLayout>
     </LinearLayout>
 

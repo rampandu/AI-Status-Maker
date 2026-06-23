@@ -5,6 +5,7 @@ import androidx.lifecycle.*
 import com.statusmaker.videoapp.data.model.Template
 import com.statusmaker.videoapp.data.model.TemplateCategory
 import com.statusmaker.videoapp.data.repository.TemplateRepository
+import kotlinx.coroutines.launch
 
 class TemplateListViewModel(private val context: Context) : ViewModel() {
 
@@ -16,12 +17,20 @@ class TemplateListViewModel(private val context: Context) : ViewModel() {
     private val _selectedCategory = MutableLiveData<TemplateCategory?>(null)
     val selectedCategory: LiveData<TemplateCategory?> = _selectedCategory
 
+    val favoriteIds: LiveData<Set<String>> = repository.getFavoriteIdsFlow().asLiveData()
+
     fun loadTemplates(category: TemplateCategory? = null) {
         _selectedCategory.value = category
         _templates.value = if (category == null) {
             repository.getAllTemplates()
         } else {
             repository.getTemplatesByCategory(category)
+        }
+    }
+
+    fun toggleFavorite(template: Template, currentlyFavorite: Boolean) {
+        viewModelScope.launch {
+            repository.toggleFavorite(template.id, currentlyFavorite)
         }
     }
 

@@ -58,8 +58,18 @@ class CategoryAdapter(
 // ─── Template Adapter ─────────────────────────────────────────────────────────
 
 class TemplateAdapter(
-    private val onTemplateClick: (Template) -> Unit
+    private val onTemplateClick: (Template) -> Unit,
+    private val onFavoriteToggle: ((Template, Boolean) -> Unit)? = null,
+    @androidx.annotation.LayoutRes private val layoutRes: Int = R.layout.item_template
 ) : ListAdapter<Template, TemplateAdapter.ViewHolder>(DIFF_CALLBACK) {
+
+    private var favoriteIds: Set<String> = emptySet()
+
+    /** Call when the favorites set changes — small dataset, full rebind is cheap and simple. */
+    fun updateFavorites(ids: Set<String>) {
+        favoriteIds = ids
+        notifyDataSetChanged()
+    }
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val thumbnail: ImageView = view.findViewById(R.id.ivTemplateThumbnail)
@@ -69,11 +79,12 @@ class TemplateAdapter(
         val premiumBadge: View = view.findViewById(R.id.ivPremiumBadge)
         val musicIcon: TextView = view.findViewById(R.id.tvMusicStyle)
         val container: View = view.findViewById(R.id.templateContainer)
+        val favoriteIcon: ImageView = view.findViewById(R.id.ivFavorite)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_template, parent, false)
+            .inflate(layoutRes, parent, false)
         return ViewHolder(view)
     }
 
@@ -97,6 +108,11 @@ class TemplateAdapter(
 
         (holder.container as? MaterialCardView)?.strokeColor =
             ColorUtils.setAlphaComponent(template.category.accentColor(holder.container.context), 90)
+
+        val isFav = template.id in favoriteIds
+        holder.favoriteIcon.setImageResource(if (isFav) R.drawable.ic_heart_filled else R.drawable.ic_heart_outline)
+        holder.favoriteIcon.setOnClickListener { onFavoriteToggle?.invoke(template, isFav) }
+        holder.favoriteIcon.visibility = if (onFavoriteToggle != null) View.VISIBLE else View.GONE
 
         holder.container.setOnClickListener { onTemplateClick(template) }
     }

@@ -19,6 +19,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
+import com.statusmaker.videoapp.R
 import com.statusmaker.videoapp.data.model.FestivalPresets
 import com.statusmaker.videoapp.data.model.MusicStyle
 import com.statusmaker.videoapp.data.model.UserInput
@@ -148,9 +149,24 @@ class EditorFragment : Fragment() {
             binding.tvTemplateTeluguName.text = template.teluguName
             binding.tvCategoryBadge.text    = "${template.category.emoji} ${template.category.displayName}"
 
-            // Pre-fill festival name only if field is empty
-            if (binding.actvFestivalName.text.isEmpty()) {
-                binding.actvFestivalName.setText(template.teluguName, false)
+            // FIX: occasion fields (Village/Business/Festival) only make
+            // sense for festival/birthday/etc. templates. For quote-mood
+            // templates (Good Morning, Love, Attitude...) they're hidden
+            // entirely — previously the Telugu quote text was getting
+            // auto-stuffed into the Festival field, which looked broken
+            // even though it was harmlessly ignored at render time.
+            if (template.category.isQuoteMood) {
+                binding.occasionFieldsGroup.visibility = View.GONE
+                binding.tilCustomMessage.hint = "Your own words (optional)"
+                if (binding.etCustomMessage.text.isNullOrEmpty()) {
+                    binding.etCustomMessage.hint = template.teluguName
+                }
+            } else {
+                binding.occasionFieldsGroup.visibility = View.VISIBLE
+                binding.tilCustomMessage.hint = resources.getString(R.string.hint_custom_message)
+                if (binding.actvFestivalName.text.isEmpty()) {
+                    binding.actvFestivalName.setText(template.teluguName, false)
+                }
             }
 
             // Pre-select matching music style

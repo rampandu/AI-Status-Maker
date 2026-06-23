@@ -46,7 +46,12 @@ class TemplateListFragment : Fragment() {
             try { TemplateCategory.valueOf(it) } catch (_: Exception) { null }
         }
 
-        templateAdapter = TemplateAdapter { template -> onTemplateSelected(template) }
+        templateAdapter = TemplateAdapter(
+            onTemplateClick = { template -> onTemplateSelected(template) },
+            onFavoriteToggle = { template, currentlyFavorite ->
+                viewModel.toggleFavorite(template, currentlyFavorite)
+            }
+        )
         binding.rvTemplates.apply {
             layoutManager = GridLayoutManager(requireContext(), 2)
             adapter = templateAdapter
@@ -62,6 +67,10 @@ class TemplateListFragment : Fragment() {
             templateAdapter.submitList(list)
             binding.tvTemplateCount.text = "${list.size} Templates"
             binding.emptyView.visibility = if (list.isEmpty()) View.VISIBLE else View.GONE
+        }
+
+        viewModel.favoriteIds.observe(viewLifecycleOwner) { ids ->
+            templateAdapter.updateFavorites(ids)
         }
 
         viewModel.selectedCategory.observe(viewLifecycleOwner) { cat ->
