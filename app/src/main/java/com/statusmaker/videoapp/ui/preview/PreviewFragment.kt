@@ -131,7 +131,7 @@ class PreviewFragment : Fragment() {
             // a content break between finishing one video and starting
             // the next. The 3-min cooldown in AdManager prevents spam.
             AdManager.getInstance(requireContext()).showInterstitialAd(requireActivity()) {
-                findNavController().navigateUp()
+                if (isAdded) findNavController().navigateUp()
             }
         }
     }
@@ -214,23 +214,78 @@ class PreviewFragment : Fragment() {
     private fun showRewardedAdThenExport() {
         if (viewModel.isPremium.value == true) { startExport(false); return }
 
-        if (AdManager.getInstance(requireContext()).isRewardedAdReady()) {
-            AdManager.getInstance(requireContext()).showRewardedAd(
-                activity       = requireActivity(),
-                onRewarded     = { startExport(false) },
-                onAdSkipped    = {
-                    startExport(true)
-                    Toast.makeText(requireContext(), "Watch full ad for watermark-free export!", Toast.LENGTH_LONG).show()
-                },
-                onAdNotAvailable = {
+        val adManager = AdManager.getInstance(requireContext())
+
+        if (adManager.isRewardedAdReady()) {
+            showLoadedRewardedAd(adManager)
+            return
+        }
+
+        // FIX: previously this branch called loadRewardedAd() and showed a
+        // toast, then did nothing — the user was stuck until they manually
+        // tapped Export again. Now we actually wait for the load (with a
+        // timeout) and automatically continue once it resolves.
+        binding.btnExport.isEnabled = false
+        binding.btnExport.text = "⏳ Loading ad…"
+
+        var resolved = false
+        val timeoutHandler = Handler(Looper.getMainLooper())
+        val timeoutRunnable = Runnable {
+            if (resolved) return@Runnable
+            resolved = true
+            if (_binding != null) {
+                resetExportButton()
+                startExport(true)
+                Toast.makeText(requireContext(), "Ad took too long to load. Exporting with watermark.", Toast.LENGTH_SHORT).show()
+            }
+        }
+        timeoutHandler.postDelayed(timeoutRunnable, 8000L) // 8s max wait
+
+        adManager.loadRewardedAd(
+            onLoaded = {
+                if (resolved) return@loadRewardedAd
+                resolved = true
+                timeoutHandler.removeCallbacks(timeoutRunnable)
+                if (_binding != null) {
+                    resetExportButton()
+                    showLoadedRewardedAd(adManager)
+                }
+            },
+            onFailed = {
+                if (resolved) return@loadRewardedAd
+                resolved = true
+                timeoutHandler.removeCallbacks(timeoutRunnable)
+                if (_binding != null) {
+                    resetExportButton()
                     startExport(true)
                     Toast.makeText(requireContext(), "Ad unavailable. Exporting with watermark.", Toast.LENGTH_SHORT).show()
                 }
-            )
-        } else {
-            AdManager.getInstance(requireContext()).loadRewardedAd()
-            Toast.makeText(requireContext(), "Loading ad, please try again in a moment.", Toast.LENGTH_SHORT).show()
-        }
+            }
+        )
+    }
+
+    private fun resetExportButton() {
+        binding.btnExport.isEnabled = true
+        binding.btnExport.text = "🎬 Export Video"
+    }
+
+    private fun showLoadedRewardedAd(adManager: AdManager) {
+        adManager.showRewardedAd(
+            activity       = requireActivity(),
+            onRewarded     = { if (_binding != null) startExport(false) },
+            onAdSkipped    = {
+                if (_binding != null) {
+                    startExport(true)
+                    Toast.makeText(requireContext(), "Watch full ad for watermark-free export!", Toast.LENGTH_LONG).show()
+                }
+            },
+            onAdNotAvailable = {
+                if (_binding != null) {
+                    startExport(true)
+                    Toast.makeText(requireContext(), "Ad unavailable. Exporting with watermark.", Toast.LENGTH_SHORT).show()
+                }
+            }
+        )
     }
 
     private fun startExport(addWatermark: Boolean) {

@@ -61,12 +61,19 @@ class HomeFragment : Fragment() {
             setAdSize(AdSize.BANNER)
         }
         binding.bannerAdContainer.addView(adView)
-        // FIX: hide the container on failure instead of leaving an empty
-        // gap with no feedback; show it again if a later retry succeeds.
+        // FIX: ad callbacks fire asynchronously and can arrive AFTER the
+        // fragment's view has been destroyed (e.g. user navigated away
+        // before the network request finished). Guard every callback with
+        // `_binding != null` to avoid touching a dead view — this was
+        // causing a real NullPointerException crash in production.
         AdManager.getInstance(requireContext()).loadBannerAd(
             adView,
-            onLoaded = { binding.bannerAdContainer.visibility = View.VISIBLE },
-            onFailed = { binding.bannerAdContainer.visibility = View.GONE }
+            onLoaded = {
+                if (_binding != null) binding.bannerAdContainer.visibility = View.VISIBLE
+            },
+            onFailed = {
+                if (_binding != null) binding.bannerAdContainer.visibility = View.GONE
+            }
         )
     }
 

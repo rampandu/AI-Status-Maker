@@ -16,9 +16,9 @@ class AdManager private constructor(private val context: Context) {
         private const val INTERSTITIAL_COOLDOWN_MS = 3 * 60 * 1000L
 
         // ── Replace these with real Ad Unit IDs before release ───────────────
-        const val BANNER_AD_UNIT   = "ca-app-pub-3940256099942544/6300978111"
-        const val INTERSTITIAL_ID  = "ca-app-pub-3940256099942544/1033173712"
-        const val REWARDED_AD_UNIT = "ca-app-pub-3940256099942544/5224354917"
+        const val BANNER_AD_UNIT   = "ca-app-pub-9535310271167305/1410870345"
+        const val INTERSTITIAL_ID  = "ca-app-pub-9535310271167305/4104939141"
+        const val REWARDED_AD_UNIT = "ca-app-pub-9535310271167305/2671981128"
 
         @Volatile private var instance: AdManager? = null
         fun getInstance(context: Context): AdManager =
@@ -31,6 +31,12 @@ class AdManager private constructor(private val context: Context) {
     private var interstitialAd: InterstitialAd? = null
     private var isRewardedLoading = false
     private var lastInterstitialTime = 0L
+
+    // FIX: previously calling loadRewardedAd() was fire-and-forget — nothing
+    // ever found out when the load finished, so the caller was stuck after
+    // showing a "Loading ad…" toast with no follow-up. This queue lets any
+    // number of callers register interest in "when does the load resolve".
+    private val pendingRewardedCallbacks = mutableListOf<Pair<() -> Unit, (String) -> Unit>>()
 
     // FIX: track whether MobileAds.initialize() has actually completed.
     // Loading ads before this is done is a common cause of silent failures.
@@ -53,18 +59,38 @@ class AdManager private constructor(private val context: Context) {
 
     // ── Rewarded Ad ───────────────────────────────────────────────────────────
 
-    fun loadRewardedAd() {
-        if (isRewardedLoading || rewardedAd != null) return
+    /**
+     * Loads a rewarded ad. Optional [onLoaded]/[onFailed] let the caller find
+     * out exactly when this specific load resolves — previously this was
+     * fire-and-forget, so a caller showing "Loading ad…" had no way to know
+     * when to actually show the ad or fall back.
+     *
+     * If an ad is already loaded, [onLoaded] fires immediately.
+     * If a load is already in progress, this callback is queued onto it
+     * instead of starting a duplicate request.
+     */
+    fun loadRewardedAd(onLoaded: () -> Unit = {}, onFailed: (String) -> Unit = {}) {
+        if (rewardedAd != null) { onLoaded(); return }
+
+        pendingRewardedCallbacks.add(onLoaded to onFailed)
+        if (isRewardedLoading) return  // callback queued; existing load will resolve it
+
         isRewardedLoading = true
         RewardedAd.load(context, REWARDED_AD_UNIT, AdRequest.Builder().build(),
             object : RewardedAdLoadCallback() {
                 override fun onAdLoaded(ad: RewardedAd) {
                     rewardedAd = ad; isRewardedLoading = false
                     Log.d(TAG, "Rewarded ad loaded")
+                    val callbacks = pendingRewardedCallbacks.toList()
+                    pendingRewardedCallbacks.clear()
+                    callbacks.forEach { (onLoadedCb, _) -> onLoadedCb() }
                 }
                 override fun onAdFailedToLoad(error: LoadAdError) {
                     rewardedAd = null; isRewardedLoading = false
                     Log.w(TAG, "Rewarded failed [${error.code}]: ${error.message}")
+                    val callbacks = pendingRewardedCallbacks.toList()
+                    pendingRewardedCallbacks.clear()
+                    callbacks.forEach { (_, onFailedCb) -> onFailedCb(error.message) }
                 }
             })
     }
