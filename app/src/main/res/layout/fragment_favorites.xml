@@ -64,8 +64,21 @@
         android:layout_height="match_parent"
         android:paddingHorizontal="10dp"
         android:paddingTop="10dp"
-        android:paddingBottom="20dp"
+        android:paddingBottom="84dp"
         android:clipToPadding="false"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+    <!-- New revenue surface: sticky bottom banner — Favorites now occupies
+         the bottom-nav slot Templates used to, so it needs the same ad
+         surface Templates had. -->
+    <FrameLayout
+        android:id="@+id/bannerAdContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="@color/surface_dark"
+        android:gravity="center"
+        android:visibility="gone"
+        android:paddingVertical="4dp" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
