@@ -1,13 +1,17 @@
 package com.statusmaker.videoapp.ui.template
 
+import android.graphics.drawable.GradientDrawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.graphics.ColorUtils
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.card.MaterialCardView
 import com.statusmaker.videoapp.R
 import com.statusmaker.videoapp.data.model.Template
 import com.statusmaker.videoapp.data.model.TemplateCategory
@@ -24,6 +28,8 @@ class CategoryAdapter(
         val name: TextView = view.findViewById(R.id.tvCategoryName)
         val teluguName: TextView = view.findViewById(R.id.tvCategoryTelugu)
         val container: View = view.findViewById(R.id.categoryContainer)
+        val accentStripe: View = view.findViewById(R.id.categoryAccentStripe)
+        val emojiChip: FrameLayout = view.findViewById(R.id.categoryEmojiChip)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -38,6 +44,12 @@ class CategoryAdapter(
         holder.name.text = category.displayName
         holder.teluguName.text = category.teluguName
         holder.container.setOnClickListener { onCategoryClick(category) }
+
+        val accent = category.accentColor(holder.container.context)
+        holder.accentStripe.setBackgroundColor(accent)
+
+        val chipBg = holder.emojiChip.background?.mutate() as? GradientDrawable
+        chipBg?.setColor(ColorUtils.setAlphaComponent(accent, 40))
     }
 
     override fun getItemCount() = categories.size
@@ -82,6 +94,9 @@ class TemplateAdapter(
             "Filmy / Tollywood" -> "🎬 Filmy"
             else -> "🎵 ${template.musicStyle.displayName}"
         }
+
+        (holder.container as? MaterialCardView)?.strokeColor =
+            ColorUtils.setAlphaComponent(template.category.accentColor(holder.container.context), 90)
 
         holder.container.setOnClickListener { onTemplateClick(template) }
     }

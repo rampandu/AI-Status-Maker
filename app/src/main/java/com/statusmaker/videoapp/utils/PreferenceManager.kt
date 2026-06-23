@@ -33,6 +33,10 @@ class PreferenceManager(private val context: Context) {
     val showOnboarding: Flow<Boolean> = context.dataStore.data
         .map { it[SHOW_ONBOARDING] ?: true }
 
+    /** Used to frequency-cap the App Open ad — see AdManager + SplashActivity. */
+    val lastAdShown: Flow<Long> = context.dataStore.data
+        .map { it[LAST_AD_SHOWN] ?: 0L }
+
     suspend fun setPremium(value: Boolean) {
         context.dataStore.edit { it[IS_PREMIUM] = value }
         if (value) context.dataStore.edit { it[WATERMARK_REMOVED] = true }

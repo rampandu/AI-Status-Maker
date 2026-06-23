@@ -126,12 +126,16 @@ class PreviewFragment : Fragment() {
         binding.btnWhatsApp.setOnClickListener    { exportedFilePath?.let { shareToWhatsApp(it) } ?: notExportedYet() }
         binding.btnShare.setOnClickListener       { exportedFilePath?.let { shareVideo(it) }      ?: notExportedYet() }
         binding.btnEditAgain.setOnClickListener {
-            // FIX: interstitial was defined in AdManager but never called
-            // anywhere in the app. This is a natural, non-intrusive spot —
-            // a content break between finishing one video and starting
-            // the next. The 3-min cooldown in AdManager prevents spam.
-            AdManager.getInstance(requireContext()).showInterstitialAd(requireActivity()) {
-                if (isAdded) findNavController().navigateUp()
+            // FIX: this previously fired for premium users too, directly
+            // contradicting the Premium screen's "no ads" pitch. Now it
+            // checks isPremium first — the 3-min cooldown in AdManager
+            // still prevents this from feeling spammy for free users.
+            if (viewModel.isPremium.value == true) {
+                findNavController().navigateUp()
+            } else {
+                AdManager.getInstance(requireContext()).showInterstitialAd(requireActivity()) {
+                    if (isAdded) findNavController().navigateUp()
+                }
             }
         }
     }

@@ -1,36 +1,51 @@
 <resources>
-    <!-- Dark theme base -->
-    <color name="bg_dark">#0D0D1A</color>
-    <color name="surface_dark">#1A1A2E</color>
-    <color name="surface_elevated">#16213E</color>
+    <!-- ── Base surfaces ──────────────────────────────────────────────────── -->
+    <color name="bg_dark">#0A0A16</color>
+    <color name="surface_dark">#14142B</color>
+    <color name="surface_elevated">#1C1C3D</color>
+    <color name="surface_overlay">#22224A</color>
+    <color name="hairline">#2A2750</color>
 
-    <!-- Accent colors -->
-    <color name="accent_gold">#FFD700</color>
-    <color name="accent_orange">#FF6B35</color>
-    <color name="accent_blue">#4B9FE1</color>
-    <color name="accent_pink">#FF69B4</color>
-    <color name="accent_green">#4CAF50</color>
-    <color name="accent_purple">#9C27B0</color>
+    <!-- ── Signature accents — marigold & ember (Sankranti flowers / diya flame) ── -->
+    <color name="accent_gold">#FFB938</color>
+    <color name="accent_gold_deep">#FF7A45</color>
+    <color name="accent_orange">#FF7A45</color>
 
-    <!-- Text -->
-    <color name="text_primary">#FFFFFF</color>
-    <color name="text_secondary">#B3B3CC</color>
-    <color name="text_hint">#666680</color>
+    <!-- ── Secondary accents ──────────────────────────────────────────────── -->
+    <color name="accent_blue">#4F9DE0</color>
+    <color name="accent_pink">#FF5C8A</color>
+    <color name="accent_green">#3FC78A</color>
+    <color name="accent_purple">#B47AEA</color>
+    <color name="accent_teal">#3FC0C7</color>
 
-    <!-- Gradient colors -->
-    <color name="gradient_start">#1E1E3F</color>
-    <color name="gradient_end">#0D0D1A</color>
+    <!-- ── Category accent map (used by CategoryAdapter / TemplateAdapter) ─── -->
+    <color name="cat_birthday">#FF5C8A</color>
+    <color name="cat_festival">#FFB938</color>
+    <color name="cat_devotional">#B47AEA</color>
+    <color name="cat_political">#4F9DE0</color>
+    <color name="cat_baby">#3FC0C7</color>
+    <color name="cat_wedding">#E0578E</color>
+    <color name="cat_business">#3FC78A</color>
 
-    <!-- Status colors -->
-    <color name="success">#4CAF50</color>
-    <color name="error">#F44336</color>
-    <color name="warning">#FF9800</color>
+    <!-- ── Text ───────────────────────────────────────────────────────────── -->
+    <color name="text_primary">#F4F2FF</color>
+    <color name="text_secondary">#A6A2C8</color>
+    <color name="text_hint">#5E5A82</color>
 
-    <!-- Common -->
+    <!-- ── Gradient stops (legacy refs kept for compatibility) ──────────────── -->
+    <color name="gradient_start">#1E1B45</color>
+    <color name="gradient_end">#0A0A16</color>
+
+    <!-- ── Status ─────────────────────────────────────────────────────────── -->
+    <color name="success">#3FC78A</color>
+    <color name="error">#FF5C5C</color>
+    <color name="warning">#FFB938</color>
+
+    <!-- ── Common ─────────────────────────────────────────────────────────── -->
     <color name="white">#FFFFFF</color>
     <color name="transparent">#00000000</color>
 
-    <!-- Bottom nav selector -->
+    <!-- ── Bottom nav ─────────────────────────────────────────────────────── -->
     <color name="bottom_nav_active">@color/accent_gold</color>
     <color name="bottom_nav_inactive">@color/text_secondary</color>
 </resources>

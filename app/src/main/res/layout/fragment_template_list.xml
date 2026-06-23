@@ -9,13 +9,15 @@
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/surface_dark">
+        android:background="@color/bg_dark"
+        app:elevation="0dp">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             app:navigationIcon="@drawable/ic_back"
+            app:navigationIconTint="@color/text_primary"
             app:title="Templates"
             app:titleTextColor="@color/text_primary" />
 
@@ -23,8 +25,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:paddingHorizontal="12dp"
-            android:paddingBottom="8dp"
+            android:paddingHorizontal="16dp"
+            android:paddingBottom="10dp"
             android:gravity="center_vertical">
 
             <TextView
@@ -34,8 +36,8 @@
                 android:layout_weight="1"
                 android:text="All Templates"
                 android:textColor="@color/text_primary"
-                android:textSize="16sp"
-                android:textStyle="bold" />
+                android:textSize="18sp"
+                android:fontFamily="sans-serif-medium" />
 
             <TextView
                 android:id="@+id/tvTemplateCount"
@@ -49,16 +51,22 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:scrollbars="none"
-            android:paddingBottom="8dp">
+            android:paddingBottom="12dp">
 
             <com.google.android.material.chip.ChipGroup
                 android:id="@+id/chipGroupCategories"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="12dp"
+                android:paddingHorizontal="16dp"
+                app:chipSpacingHorizontal="8dp"
                 app:singleSelection="true"
                 app:selectionRequired="true" />
         </HorizontalScrollView>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/hairline" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -66,9 +74,9 @@
         android:id="@+id/rvTemplates"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingHorizontal="8dp"
-        android:paddingTop="8dp"
-        android:paddingBottom="16dp"
+        android:paddingHorizontal="10dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="84dp"
         android:clipToPadding="false"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
@@ -82,5 +90,17 @@
         android:textColor="@color/text_secondary"
         android:visibility="gone"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+    <!-- New revenue surface: sticky bottom banner, only on the screen users
+         browse longest. Defaults hidden — shown only on a successful load. -->
+    <FrameLayout
+        android:id="@+id/bannerAdContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="@color/surface_dark"
+        android:gravity="center"
+        android:visibility="gone"
+        android:paddingVertical="4dp" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -2,12 +2,17 @@
     <style name="Theme.StatusMaker" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="colorPrimary">@color/accent_gold</item>
         <item name="colorPrimaryDark">@color/bg_dark</item>
-        <item name="colorAccent">@color/accent_orange</item>
+        <item name="colorAccent">@color/accent_gold_deep</item>
+        <item name="colorSurface">@color/surface_dark</item>
+        <item name="colorOnSurface">@color/text_primary</item>
         <item name="android:windowBackground">@color/bg_dark</item>
         <item name="android:statusBarColor">@color/bg_dark</item>
-        <item name="android:navigationBarColor">@color/surface_dark</item>
+        <item name="android:navigationBarColor">@color/bg_dark</item>
 
-        <!-- Material components -->
+        <item name="textAppearanceHeadline6">@style/TextAppearance.App.Title</item>
+        <item name="textAppearanceBody2">@style/TextAppearance.App.Body</item>
+        <item name="textAppearanceCaption">@style/TextAppearance.App.Caption</item>
+
         <item name="materialAlertDialogTheme">@style/ThemeOverlay.App.MaterialAlertDialog</item>
     </style>
 
@@ -16,7 +21,14 @@
     </style>
 
     <style name="ThemeOverlay.App.MaterialAlertDialog" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
-        <item name="colorSurface">@color/surface_dark</item>
+        <item name="colorSurface">@color/surface_elevated</item>
         <item name="colorOnSurface">@color/text_primary</item>
+        <item name="buttonBarPositiveButtonStyle">@style/Widget.App.AlertButton</item>
+        <item name="buttonBarNegativeButtonStyle">@style/Widget.App.AlertButton</item>
+        <item name="buttonBarNeutralButtonStyle">@style/Widget.App.AlertButton</item>
+    </style>
+
+    <style name="Widget.App.AlertButton" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:textColor">@color/accent_gold</item>
     </style>
 </resources>

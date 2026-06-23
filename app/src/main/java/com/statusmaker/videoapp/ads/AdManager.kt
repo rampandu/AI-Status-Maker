@@ -2,12 +2,16 @@ package com.statusmaker.videoapp.ads
 
 import android.app.Activity
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import com.google.android.gms.ads.*
+import com.google.android.gms.ads.appopen.AppOpenAd
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
+import java.util.Date
 
 class AdManager private constructor(private val context: Context) {
 
@@ -15,10 +19,18 @@ class AdManager private constructor(private val context: Context) {
         private const val TAG = "AdManager"
         private const val INTERSTITIAL_COOLDOWN_MS = 3 * 60 * 1000L
 
+        // App Open ads expire after ~4h per Google's own reference implementation —
+        // serving a stale cached ad past that window has a high show-failure rate.
+        private const val APP_OPEN_AD_MAX_AGE_MS = 4 * 60 * 60 * 1000L
+
         // ── Replace these with real Ad Unit IDs before release ───────────────
-        const val BANNER_AD_UNIT   = "ca-app-pub-9535310271167305/1410870345"
-        const val INTERSTITIAL_ID  = "ca-app-pub-9535310271167305/4104939141"
-        const val REWARDED_AD_UNIT = "ca-app-pub-9535310271167305/2671981128"
+        const val BANNER_AD_UNIT    = "ca-app-pub-9535310271167305/1410870345"
+        const val INTERSTITIAL_ID   = "ca-app-pub-9535310271167305/4104939141"
+        const val REWARDED_AD_UNIT  = "ca-app-pub-9535310271167305/2671981128"
+        // App Open ad unit — create this in AdMob console (Ad format: App Open)
+        // and replace before release. Using Google's public test unit for now
+        // so the flow can be verified before the real unit is approved.
+        const val APP_OPEN_AD_UNIT  = "ca-app-pub-3940256099942544/9257395921"
 
         @Volatile private var instance: AdManager? = null
         fun getInstance(context: Context): AdManager =
@@ -32,22 +44,21 @@ class AdManager private constructor(private val context: Context) {
     private var isRewardedLoading = false
     private var lastInterstitialTime = 0L
 
-    // FIX: previously calling loadRewardedAd() was fire-and-forget — nothing
-    // ever found out when the load finished, so the caller was stuck after
-    // showing a "Loading ad…" toast with no follow-up. This queue lets any
-    // number of callers register interest in "when does the load resolve".
     private val pendingRewardedCallbacks = mutableListOf<Pair<() -> Unit, (String) -> Unit>>()
 
-    // FIX: track whether MobileAds.initialize() has actually completed.
-    // Loading ads before this is done is a common cause of silent failures.
     @Volatile private var isSdkInitialized = false
     private val pendingBannerLoads = mutableListOf<AdView>()
+
+    // ── App Open ad state ──────────────────────────────────────────────────
+    private var appOpenAd: AppOpenAd? = null
+    private var appOpenLoadTime: Long = 0L
+    private var isAppOpenLoading = false
+    private var isShowingAppOpenAd = false
 
     fun onSdkInitialized() {
         isSdkInitialized = true
         Log.d(TAG, "AdMob SDK initialized")
         preloadAds()
-        // Flush any banners that tried to load before init finished
         pendingBannerLoads.forEach { it.loadAd(AdRequest.Builder().build()) }
         pendingBannerLoads.clear()
     }
@@ -55,25 +66,16 @@ class AdManager private constructor(private val context: Context) {
     fun preloadAds() {
         loadRewardedAd()
         loadInterstitialAd()
+        loadAppOpenAd()
     }
 
     // ── Rewarded Ad ───────────────────────────────────────────────────────────
 
-    /**
-     * Loads a rewarded ad. Optional [onLoaded]/[onFailed] let the caller find
-     * out exactly when this specific load resolves — previously this was
-     * fire-and-forget, so a caller showing "Loading ad…" had no way to know
-     * when to actually show the ad or fall back.
-     *
-     * If an ad is already loaded, [onLoaded] fires immediately.
-     * If a load is already in progress, this callback is queued onto it
-     * instead of starting a duplicate request.
-     */
     fun loadRewardedAd(onLoaded: () -> Unit = {}, onFailed: (String) -> Unit = {}) {
         if (rewardedAd != null) { onLoaded(); return }
 
         pendingRewardedCallbacks.add(onLoaded to onFailed)
-        if (isRewardedLoading) return  // callback queued; existing load will resolve it
+        if (isRewardedLoading) return
 
         isRewardedLoading = true
         RewardedAd.load(context, REWARDED_AD_UNIT, AdRequest.Builder().build(),
@@ -144,6 +146,13 @@ class AdManager private constructor(private val context: Context) {
 
     fun isInterstitialReady() = interstitialAd != null
 
+    /**
+     * Shared cooldown applies across ALL interstitial trigger points in the
+     * app (Edit Again, Templates→Home, My Videos→Home) — so adding more
+     * trigger points increases the *chance* an interstitial fires at a
+     * natural break point, without increasing total frequency past one
+     * every 3 minutes.
+     */
     fun showInterstitialAd(activity: Activity, onDismissed: () -> Unit = {}) {
         val now = System.currentTimeMillis()
         if (now - lastInterstitialTime < INTERSTITIAL_COOLDOWN_MS) {
@@ -170,15 +179,17 @@ class AdManager private constructor(private val context: Context) {
     // ── Banner ────────────────────────────────────────────────────────────────
 
     /**
-     * FIX: previously this had no listener at all, so a failed banner load
-     * (no fill, network error, SDK not ready) was completely silent — the
-     * container just stayed empty with zero diagnostic info.
-     *
-     * Now: logs every outcome, and if the SDK hasn't finished initializing
-     * yet, the load is queued instead of fired immediately (which can fail
-     * silently on some SDK versions if called too early).
+     * FIX: previously a failed banner load was completely silent. Now logs
+     * every outcome AND retries with backoff (15s, then 45s) before giving
+     * up for this AdView — a transient no-fill or network blip no longer
+     * permanently empties the banner slot for the rest of the session.
      */
-    fun loadBannerAd(adView: AdView, onLoaded: () -> Unit = {}, onFailed: (String) -> Unit = {}) {
+    fun loadBannerAd(
+        adView: AdView,
+        onLoaded: () -> Unit = {},
+        onFailed: (String) -> Unit = {},
+        retriesLeft: Int = 2
+    ) {
         adView.adListener = object : AdListener() {
             override fun onAdLoaded() {
                 Log.d(TAG, "Banner loaded")
@@ -186,7 +197,15 @@ class AdManager private constructor(private val context: Context) {
             }
             override fun onAdFailedToLoad(error: LoadAdError) {
                 Log.w(TAG, "Banner failed [${error.code}]: ${error.message} (domain=${error.domain})")
-                onFailed(error.message)
+                if (retriesLeft > 0) {
+                    val delayMs = if (retriesLeft == 2) 15_000L else 45_000L
+                    Log.d(TAG, "Retrying banner in ${delayMs}ms ($retriesLeft retries left)")
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        loadBannerAd(adView, onLoaded, onFailed, retriesLeft - 1)
+                    }, delayMs)
+                } else {
+                    onFailed(error.message)
+                }
             }
         }
 
@@ -196,5 +215,63 @@ class AdManager private constructor(private val context: Context) {
             return
         }
         adView.loadAd(AdRequest.Builder().build())
+    }
+
+    // ── App Open Ad ────────────────────────────────────────────────────────────
+
+    fun loadAppOpenAd() {
+        if (isAppOpenLoading || isAppOpenAdAvailable()) return
+        isAppOpenLoading = true
+        AppOpenAd.load(
+            context, APP_OPEN_AD_UNIT, AdRequest.Builder().build(),
+            object : AppOpenAd.AppOpenAdLoadCallback() {
+                override fun onAdLoaded(ad: AppOpenAd) {
+                    appOpenAd = ad
+                    appOpenLoadTime = Date().time
+                    isAppOpenLoading = false
+                    Log.d(TAG, "App Open ad loaded")
+                }
+                override fun onAdFailedToLoad(error: LoadAdError) {
+                    isAppOpenLoading = false
+                    Log.w(TAG, "App Open ad failed [${error.code}]: ${error.message}")
+                }
+            }
+        )
+    }
+
+    private fun isAppOpenAdAvailable(): Boolean =
+        appOpenAd != null && (Date().time - appOpenLoadTime) < APP_OPEN_AD_MAX_AGE_MS
+
+    /**
+     * Shows the App Open ad if one is cached and not stale. [onComplete]
+     * always fires exactly once — either after the ad is dismissed, or
+     * immediately if no ad is available — so the caller (Splash screen)
+     * can always proceed into the app without getting stuck.
+     */
+    fun showAppOpenAdIfAvailable(activity: Activity, onComplete: () -> Unit) {
+        if (isShowingAppOpenAd) { onComplete(); return }
+        if (!isAppOpenAdAvailable()) {
+            Log.d(TAG, "App Open ad not available — skipping")
+            loadAppOpenAd()
+            onComplete()
+            return
+        }
+        appOpenAd?.fullScreenContentCallback = object : FullScreenContentCallback() {
+            override fun onAdDismissedFullScreenContent() {
+                appOpenAd = null; isShowingAppOpenAd = false
+                loadAppOpenAd()
+                onComplete()
+            }
+            override fun onAdFailedToShowFullScreenContent(e: AdError) {
+                Log.w(TAG, "App Open ad failed to show: ${e.message}")
+                appOpenAd = null; isShowingAppOpenAd = false
+                loadAppOpenAd()
+                onComplete()
+            }
+            override fun onAdShowedFullScreenContent() {
+                isShowingAppOpenAd = true
+            }
+        }
+        appOpenAd?.show(activity)
     }
 }

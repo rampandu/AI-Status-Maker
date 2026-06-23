@@ -4,13 +4,15 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- Gold play button triangle centered in safe zone -->
     <path
-        android:fillColor="#FFD700"
-        android:pathData="M38,32 L80,54 L38,76 Z"/>
-    <!-- Small sparkle top-right -->
+        android:fillColor="#FFB938"
+        android:pathData="M38,30 L82,54 L38,78 Z"/>
+    <path
+        android:fillColor="#FF7A45"
+        android:fillAlpha="0.85"
+        android:pathData="M38,44 L60,54 L38,64 Z"/>
     <path
         android:fillColor="#FFFFFF"
-        android:fillAlpha="0.6"
-        android:pathData="M72,24 L74,30 L80,32 L74,34 L72,40 L70,34 L64,32 L70,30 Z"/>
+        android:fillAlpha="0.65"
+        android:pathData="M74,22 L76,28 L82,30 L76,32 L74,38 L72,32 L66,30 L72,28 Z"/>
 </vector>

@@ -9,14 +9,20 @@
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/surface_dark">
+        android:background="@color/bg_dark"
+        app:elevation="0dp">
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             app:navigationIcon="@drawable/ic_back"
+            app:navigationIconTint="@color/text_primary"
             app:title="Preview &amp; Export"
             app:titleTextColor="@color/text_primary" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/hairline" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
@@ -28,15 +34,17 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:padding="18dp">
 
             <!-- Preview Card: animated frame preview BEFORE export, ExoPlayer AFTER export -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="8dp"
+                android:layout_marginBottom="18dp"
+                app:cardCornerRadius="@dimen/radius_lg"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/hairline"
+                app:strokeWidth="1dp"
                 app:cardBackgroundColor="@color/surface_dark">
 
                 <FrameLayout
@@ -71,13 +79,14 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="top|start"
-                        android:layout_margin="8dp"
-                        android:background="#CC000000"
-                        android:paddingHorizontal="8dp"
-                        android:paddingVertical="4dp"
+                        android:layout_margin="10dp"
+                        android:background="@drawable/bg_duration_pill"
+                        android:paddingHorizontal="10dp"
+                        android:paddingVertical="5dp"
                         android:text="⏯ PREVIEW"
-                        android:textColor="#FFD700"
+                        android:textColor="@color/accent_gold"
                         android:textSize="10sp"
+                        android:fontFamily="sans-serif-medium"
                         android:textStyle="bold" />
 
                 </FrameLayout>
@@ -96,37 +105,39 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:background="@drawable/bg_category_badge"
-                    android:paddingHorizontal="8dp"
-                    android:paddingVertical="4dp"
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="5dp"
                     android:textColor="@color/text_primary"
-                    android:textSize="11sp" />
+                    android:textSize="11sp"
+                    android:fontFamily="sans-serif-medium" />
 
                 <TextView
                     android:id="@+id/tvPreviewTemplateName"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_marginStart="8dp"
+                    android:layout_marginStart="10dp"
                     android:textColor="@color/text_primary"
                     android:textSize="15sp"
-                    android:textStyle="bold" />
+                    android:fontFamily="sans-serif-medium" />
             </LinearLayout>
 
-            <!-- Ad Notice (free users) -->
+            <!-- Ad Notice (free users) — glass card -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardAdNotice"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                app:cardBackgroundColor="#1AFFD700"
-                app:cardCornerRadius="8dp"
+                android:layout_marginBottom="14dp"
+                app:cardBackgroundColor="@color/surface_overlay"
+                app:cardCornerRadius="@dimen/radius_sm"
+                app:cardElevation="0dp"
                 app:strokeColor="@color/accent_gold"
                 app:strokeWidth="1dp">
                 <TextView
                     android:id="@+id/tvAdNotice"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:padding="12dp"
+                    android:padding="13dp"
                     android:text="📺 Watch a short ad to export without watermark. Upgrade to Premium to skip ads!"
                     android:textColor="@color/accent_gold"
                     android:textSize="12sp" />
@@ -137,7 +148,7 @@
                 android:id="@+id/exportProgress"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
+                android:layout_marginBottom="14dp"
                 android:orientation="vertical"
                 android:visibility="gone">
 
@@ -145,7 +156,7 @@
                     android:id="@+id/tvExportStatus"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="6dp"
+                    android:layout_marginBottom="8dp"
                     android:text="Preparing..."
                     android:textColor="@color/text_secondary"
                     android:textSize="13sp" />
@@ -162,15 +173,12 @@
             <!-- Export Button -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnExport"
+                style="@style/Widget.App.Button.Primary"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
-                android:layout_marginBottom="12dp"
-                android:backgroundTint="@color/accent_gold"
+                android:layout_marginBottom="14dp"
                 android:text="🎬 Export Video"
-                android:textColor="@color/bg_dark"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                app:cornerRadius="12dp" />
+                android:textSize="16sp" />
 
             <!-- Share Buttons (shown after export) -->
             <LinearLayout
@@ -183,11 +191,12 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
+                    android:layout_marginBottom="10dp"
                     android:gravity="center"
                     android:text="✅ Video exported — tap Play above to watch!"
-                    android:textColor="#4CAF50"
+                    android:textColor="@color/success"
                     android:textSize="14sp"
+                    android:fontFamily="sans-serif-medium"
                     android:textStyle="bold" />
 
                 <LinearLayout
@@ -204,7 +213,7 @@
                         android:backgroundTint="#25D366"
                         android:text="WhatsApp"
                         android:textColor="@color/white"
-                        app:cornerRadius="10dp"
+                        app:cornerRadius="@dimen/radius_sm"
                         app:icon="@drawable/ic_whatsapp"
                         app:iconTint="@color/white" />
 
@@ -217,21 +226,18 @@
                         android:backgroundTint="@color/accent_blue"
                         android:text="Share"
                         android:textColor="@color/white"
-                        app:cornerRadius="10dp"
+                        app:cornerRadius="@dimen/radius_sm"
                         app:icon="@drawable/ic_share"
                         app:iconTint="@color/white" />
                 </LinearLayout>
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnEditAgain"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    style="@style/Widget.App.Button.Outline"
                     android:layout_width="match_parent"
                     android:layout_height="48dp"
-                    android:layout_marginTop="8dp"
-                    android:text="Edit Again"
-                    android:textColor="@color/text_primary"
-                    app:cornerRadius="10dp"
-                    app:strokeColor="@color/text_secondary" />
+                    android:layout_marginTop="10dp"
+                    android:text="Edit Again" />
             </LinearLayout>
 
         </LinearLayout>

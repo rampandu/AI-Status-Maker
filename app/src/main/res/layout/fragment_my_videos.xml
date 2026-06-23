@@ -9,14 +9,20 @@
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/surface_dark">
+        android:background="@color/bg_dark"
+        app:elevation="0dp">
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             app:title="My Videos"
             app:titleTextColor="@color/text_primary"
-            app:navigationIcon="@drawable/ic_back" />
+            app:navigationIcon="@drawable/ic_back"
+            app:navigationIconTint="@color/text_primary" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/hairline" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <!-- Empty state -->
@@ -43,7 +49,7 @@
             android:text="No videos yet"
             android:textColor="@color/text_primary"
             android:textSize="20sp"
-            android:textStyle="bold"
+            android:fontFamily="sans-serif-medium"
             android:layout_marginBottom="8dp" />
 
         <TextView
@@ -61,7 +67,19 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="8dp"
+        android:paddingBottom="84dp"
         android:clipToPadding="false"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+    <!-- New revenue surface: sticky bottom banner -->
+    <FrameLayout
+        android:id="@+id/bannerAdContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="@color/surface_dark"
+        android:gravity="center"
+        android:visibility="gone"
+        android:paddingVertical="4dp" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

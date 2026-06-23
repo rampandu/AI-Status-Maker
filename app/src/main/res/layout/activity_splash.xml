@@ -6,6 +6,16 @@
     android:layout_height="match_parent"
     android:background="@color/bg_dark">
 
+    <View
+        android:id="@+id/splashGlow"
+        android:layout_width="280dp"
+        android:layout_height="280dp"
+        android:background="@drawable/bg_glow_marigold"
+        app:layout_constraintBottom_toBottomOf="@id/ivSplashLogo"
+        app:layout_constraintEnd_toEndOf="@id/ivSplashLogo"
+        app:layout_constraintStart_toStartOf="@id/ivSplashLogo"
+        app:layout_constraintTop_toTopOf="@id/ivSplashLogo" />
+
     <ImageView
         android:id="@+id/ivSplashLogo"
         android:layout_width="120dp"
@@ -22,11 +32,12 @@
         android:id="@+id/tvAppName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="20dp"
         android:text="@string/app_name"
         android:textColor="@color/text_primary"
-        android:textSize="28sp"
-        android:textStyle="bold"
+        android:textSize="26sp"
+        android:fontFamily="sans-serif-black"
+        android:letterSpacing="-0.01"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/ivSplashLogo" />
@@ -35,10 +46,10 @@
         android:id="@+id/tvTagline"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="6dp"
         android:text="@string/splash_tagline"
         android:textColor="@color/text_secondary"
-        android:textSize="14sp"
+        android:textSize="13sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvAppName" />

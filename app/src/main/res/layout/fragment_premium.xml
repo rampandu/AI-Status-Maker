@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="20dp">
+        android:padding="22dp">
 
         <!-- Header -->
         <TextView
@@ -19,46 +19,49 @@
             android:gravity="center"
             android:text="⭐ Premium"
             android:textColor="@color/accent_gold"
-            android:textSize="32sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="8dp"/>
+            android:textSize="30sp"
+            android:fontFamily="sans-serif-black"
+            android:letterSpacing="-0.01"
+            android:layout_marginBottom="10dp"/>
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="Unlock unlimited video creation\nNo watermarks • All templates • No ads"
+            android:text="Unlock unlimited video creation\nNo watermarks • All templates • Zero ads"
             android:textColor="@color/text_secondary"
             android:textSize="14sp"
-            android:layout_marginBottom="24dp"/>
+            android:layout_marginBottom="26dp"/>
 
         <!-- Benefits Card -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
-            app:cardBackgroundColor="@color/surface_dark"
-            app:cardCornerRadius="16dp"
+            android:layout_marginBottom="22dp"
+            android:background="@drawable/bg_card_dark"
+            app:cardBackgroundColor="@android:color/transparent"
+            app:cardCornerRadius="@dimen/radius_lg"
+            app:cardElevation="0dp"
             app:strokeColor="@color/accent_gold"
             app:strokeWidth="1dp">
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:padding="18dp">
 
                 <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
                     android:text="✅  Remove watermark permanently"
-                    android:textColor="@color/text_primary" android:textSize="14sp" android:layout_marginBottom="8dp"/>
+                    android:textColor="@color/text_primary" android:textSize="14sp" android:layout_marginBottom="10dp"/>
                 <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:text="✅  No ads before export"
-                    android:textColor="@color/text_primary" android:textSize="14sp" android:layout_marginBottom="8dp"/>
+                    android:text="✅  No banner, interstitial, or launch ads"
+                    android:textColor="@color/text_primary" android:textSize="14sp" android:layout_marginBottom="10dp"/>
                 <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
                     android:text="✅  Access all premium templates"
-                    android:textColor="@color/text_primary" android:textSize="14sp" android:layout_marginBottom="8dp"/>
+                    android:textColor="@color/text_primary" android:textSize="14sp" android:layout_marginBottom="10dp"/>
                 <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
                     android:text="✅  Unlimited video exports"
-                    android:textColor="@color/text_primary" android:textSize="14sp" android:layout_marginBottom="8dp"/>
+                    android:textColor="@color/text_primary" android:textSize="14sp" android:layout_marginBottom="10dp"/>
                 <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
                     android:text="✅  Priority support"
                     android:textColor="@color/text_primary" android:textSize="14sp"/>
@@ -68,59 +71,58 @@
         <!-- Monthly Plan -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnMonthlyPlan"
+            style="@style/Widget.App.Button.Outline"
             android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:layout_marginBottom="12dp"
-            android:backgroundTint="@color/accent_gold"
+            android:layout_marginBottom="14dp"
             android:text="Monthly Premium – ₹99/month"
-            android:textColor="@color/bg_dark"
-            android:textStyle="bold"
-            app:cornerRadius="12dp" />
+            android:textColor="@color/text_primary" />
 
-        <!-- Annual Plan -->
+        <!-- Annual Plan — "Best Value" ribbon card -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
-            app:cardBackgroundColor="@color/accent_gold"
-            app:cardCornerRadius="12dp">
+            android:layout_marginBottom="14dp"
+            app:cardBackgroundColor="@android:color/transparent"
+            app:cardCornerRadius="@dimen/radius_md"
+            app:cardElevation="0dp">
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
                 <TextView
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="#CC000000"
+                    android:layout_gravity="center"
+                    android:background="@drawable/bg_premium_badge"
                     android:gravity="center"
-                    android:padding="3dp"
+                    android:paddingHorizontal="14dp"
+                    android:paddingVertical="5dp"
+                    android:layout_marginBottom="-1dp"
                     android:text="🔥 BEST VALUE – SAVE 50%"
-                    android:textColor="@color/accent_gold"
+                    android:textColor="@color/bg_dark"
                     android:textSize="11sp"
+                    android:fontFamily="sans-serif-medium"
                     android:textStyle="bold"/>
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnAnnualPlan"
+                    style="@style/Widget.App.Button.Primary"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
-                    android:backgroundTint="@color/accent_gold"
                     android:text="Annual Premium – ₹599/year"
-                    android:textColor="@color/bg_dark"
-                    android:textStyle="bold"
-                    app:cornerRadius="0dp" />
+                    android:textSize="15sp" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
         <!-- One-time Watermark Removal -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnRemoveWatermark"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            style="@style/Widget.App.Button.Outline"
             android:layout_width="match_parent"
             android:layout_height="48dp"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="18dp"
             android:text="Remove Watermark Only – ₹49 (one-time)"
-            android:textColor="@color/text_primary"
-            app:cornerRadius="12dp"
-            app:strokeColor="@color/text_secondary" />
+            android:textColor="@color/text_primary" />
 
         <!-- Success message (hidden) -->
         <LinearLayout
@@ -134,8 +136,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="🎉 Premium Activated! Enjoy!"
-                android:textColor="#4CAF50"
+                android:textColor="@color/success"
                 android:textSize="18sp"
+                android:fontFamily="sans-serif-medium"
                 android:textStyle="bold"/>
         </LinearLayout>
 
@@ -152,9 +155,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="10dp"
             android:text="Subscriptions auto-renew. Cancel anytime in Play Store.\nPayment charged to Google Play account."
-            android:textColor="@color/text_secondary"
+            android:textColor="@color/text_hint"
             android:textSize="11sp" />
 
     </LinearLayout>

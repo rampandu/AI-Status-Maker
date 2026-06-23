@@ -1,5 +1,7 @@
 package com.statusmaker.videoapp.ui.home
 
+import android.animation.ObjectAnimator
+import android.animation.ValueAnimator
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -21,6 +23,7 @@ class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
     private val viewModel: HomeViewModel by viewModels { HomeViewModel.Factory(requireContext()) }
+    private var glowAnimator: ObjectAnimator? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
@@ -31,8 +34,8 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         setupCategoryGrid()
-        setupBannerAd()
-        observeViewModel()
+        observePremiumAndAds()
+        startGlowPulse()
 
         binding.btnCreateNew.setOnClickListener {
             findNavController().navigate(R.id.action_homeFragment_to_templateListFragment)
@@ -40,6 +43,19 @@ class HomeFragment : Fragment() {
 
         binding.btnPremium.setOnClickListener {
             findNavController().navigate(R.id.action_homeFragment_to_premiumFragment)
+        }
+    }
+
+    /**
+     * The one signature motion on this screen: a slow, restrained pulse on
+     * the marigold glow behind the hero card.
+     */
+    private fun startGlowPulse() {
+        glowAnimator = ObjectAnimator.ofFloat(binding.heroGlow, View.ALPHA, 0.55f, 1f).apply {
+            duration = 2400L
+            repeatMode = ValueAnimator.REVERSE
+            repeatCount = ValueAnimator.INFINITE
+            start()
         }
     }
 
@@ -61,11 +77,9 @@ class HomeFragment : Fragment() {
             setAdSize(AdSize.BANNER)
         }
         binding.bannerAdContainer.addView(adView)
-        // FIX: ad callbacks fire asynchronously and can arrive AFTER the
-        // fragment's view has been destroyed (e.g. user navigated away
-        // before the network request finished). Guard every callback with
-        // `_binding != null` to avoid touching a dead view — this was
-        // causing a real NullPointerException crash in production.
+        // Banner callbacks are guarded against a destroyed view (FIX), and
+        // the AdManager itself now retries on failure with backoff before
+        // giving up — see AdManager.loadBannerAd().
         AdManager.getInstance(requireContext()).loadBannerAd(
             adView,
             onLoaded = {
@@ -77,18 +91,33 @@ class HomeFragment : Fragment() {
         )
     }
 
-    private fun observeViewModel() {
+    /**
+     * FIX: the banner previously loaded unconditionally regardless of
+     * premium status — directly contradicting the Premium screen's "no
+     * ads" pitch. Now the banner is only ever created for non-premium
+     * users, and is torn down immediately if the user upgrades while this
+     * screen is visible.
+     */
+    private fun observePremiumAndAds() {
         viewModel.totalVideosCreated.observe(viewLifecycleOwner) { count ->
             binding.tvVideosCount.text = "$count videos created"
         }
         viewModel.isPremium.observe(viewLifecycleOwner) { isPremium ->
             binding.btnPremium.visibility = if (isPremium) View.GONE else View.VISIBLE
             binding.tvPremiumBadge.visibility = if (isPremium) View.VISIBLE else View.GONE
+            if (isPremium) {
+                binding.bannerAdContainer.removeAllViews()
+                binding.bannerAdContainer.visibility = View.GONE
+            } else if (binding.bannerAdContainer.childCount == 0) {
+                setupBannerAd()
+            }
         }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
+        glowAnimator?.cancel()
+        glowAnimator = null
         _binding = null
     }
 }

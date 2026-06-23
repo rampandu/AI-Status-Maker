@@ -9,14 +9,20 @@
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/surface_dark">
+        android:background="@color/bg_dark"
+        app:elevation="0dp">
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             app:navigationIcon="@drawable/ic_back"
+            app:navigationIconTint="@color/text_primary"
             app:title="Customize"
             app:titleTextColor="@color/text_primary" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/hairline" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
@@ -28,20 +34,24 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:padding="18dp">
 
             <!-- Template Info Card -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                app:cardBackgroundColor="@color/surface_dark"
-                app:cardCornerRadius="12dp">
+                android:background="@drawable/bg_card_dark"
+                app:cardBackgroundColor="@android:color/transparent"
+                app:cardCornerRadius="@dimen/radius_md"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/hairline"
+                app:strokeWidth="1dp">
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:padding="12dp"
+                    android:padding="14dp"
                     android:gravity="center_vertical">
 
                     <LinearLayout
@@ -55,11 +65,12 @@
                             android:layout_height="wrap_content"
                             android:textColor="@color/text_primary"
                             android:textSize="16sp"
-                            android:textStyle="bold" />
+                            android:fontFamily="sans-serif-medium" />
                         <TextView
                             android:id="@+id/tvTemplateTeluguName"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
                             android:textColor="@color/text_secondary"
                             android:textSize="13sp" />
                     </LinearLayout>
@@ -69,10 +80,11 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:background="@drawable/bg_category_badge"
-                        android:paddingHorizontal="8dp"
-                        android:paddingVertical="4dp"
+                        android:paddingHorizontal="10dp"
+                        android:paddingVertical="5dp"
                         android:textColor="@color/text_primary"
-                        android:textSize="11sp" />
+                        android:textSize="11sp"
+                        android:fontFamily="sans-serif-medium" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -81,13 +93,14 @@
                 android:id="@+id/cvPhotoSelector"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="18dp"
                 android:clickable="true"
                 android:focusable="true"
-                app:cardBackgroundColor="@color/surface_dark"
-                app:cardCornerRadius="12dp"
-                app:strokeColor="@color/accent_gold"
-                app:strokeWidth="1dp">
+                android:foreground="@drawable/fg_card_ripple"
+                android:background="@drawable/bg_photo_selector"
+                app:cardBackgroundColor="@android:color/transparent"
+                app:cardCornerRadius="@dimen/radius_md"
+                app:cardElevation="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -96,18 +109,27 @@
                     android:padding="16dp"
                     android:gravity="center_vertical">
 
-                    <ImageView
-                        android:id="@+id/ivSelectedPhoto"
-                        android:layout_width="72dp"
-                        android:layout_height="72dp"
-                        android:scaleType="centerCrop"
-                        android:src="@drawable/ic_add_photo" />
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="64dp"
+                        android:layout_height="64dp"
+                        app:cardCornerRadius="@dimen/radius_sm"
+                        app:cardBackgroundColor="@color/surface_overlay"
+                        app:cardElevation="0dp">
+                        <ImageView
+                            android:id="@+id/ivSelectedPhoto"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:scaleType="centerCrop"
+                            android:padding="14dp"
+                            android:src="@drawable/ic_add_photo"
+                            app:tint="@color/accent_gold" />
+                    </com.google.android.material.card.MaterialCardView>
 
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:layout_marginStart="12dp"
+                        android:layout_marginStart="14dp"
                         android:orientation="vertical">
 
                         <TextView
@@ -116,20 +138,21 @@
                             android:text="@string/add_photo"
                             android:textColor="@color/text_primary"
                             android:textSize="15sp"
-                            android:textStyle="bold" />
+                            android:fontFamily="sans-serif-medium" />
 
                         <TextView
                             android:id="@+id/tvPhotoHint"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginTop="1dp"
                             android:text="@string/photo_hint"
                             android:textColor="@color/text_secondary"
                             android:textSize="12sp" />
                     </LinearLayout>
 
                     <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
                         android:src="@drawable/ic_chevron_right"
                         app:tint="@color/text_secondary" />
                 </LinearLayout>
@@ -143,8 +166,13 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
                 android:hint="@string/hint_person_name"
+                app:boxCornerRadiusTopStart="@dimen/radius_sm"
+                app:boxCornerRadiusTopEnd="@dimen/radius_sm"
+                app:boxCornerRadiusBottomStart="@dimen/radius_sm"
+                app:boxCornerRadiusBottomEnd="@dimen/radius_sm"
                 app:boxStrokeColor="@color/accent_gold"
-                app:hintTextColor="@color/text_secondary">
+                app:boxStrokeWidth="1dp"
+                app:hintTextColor="@color/accent_gold">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etPersonName"
                     android:layout_width="match_parent"
@@ -160,6 +188,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
                 android:hint="@string/hint_village_name"
+                app:boxCornerRadiusTopStart="@dimen/radius_sm"
+                app:boxCornerRadiusTopEnd="@dimen/radius_sm"
+                app:boxCornerRadiusBottomStart="@dimen/radius_sm"
+                app:boxCornerRadiusBottomEnd="@dimen/radius_sm"
                 app:boxStrokeColor="@color/accent_gold"
                 app:hintTextColor="@color/text_secondary">
                 <com.google.android.material.textfield.TextInputEditText
@@ -177,6 +209,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
                 android:hint="@string/hint_business_name"
+                app:boxCornerRadiusTopStart="@dimen/radius_sm"
+                app:boxCornerRadiusTopEnd="@dimen/radius_sm"
+                app:boxCornerRadiusBottomStart="@dimen/radius_sm"
+                app:boxCornerRadiusBottomEnd="@dimen/radius_sm"
                 app:boxStrokeColor="@color/accent_gold"
                 app:hintTextColor="@color/text_secondary">
                 <com.google.android.material.textfield.TextInputEditText
@@ -194,6 +230,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
                 android:hint="@string/hint_festival_name"
+                app:boxCornerRadiusTopStart="@dimen/radius_sm"
+                app:boxCornerRadiusTopEnd="@dimen/radius_sm"
+                app:boxCornerRadiusBottomStart="@dimen/radius_sm"
+                app:boxCornerRadiusBottomEnd="@dimen/radius_sm"
                 app:boxStrokeColor="@color/accent_gold"
                 app:hintTextColor="@color/text_secondary">
                 <AutoCompleteTextView
@@ -209,8 +249,12 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
+                android:layout_marginBottom="16dp"
                 android:hint="@string/hint_custom_message"
+                app:boxCornerRadiusTopStart="@dimen/radius_sm"
+                app:boxCornerRadiusTopEnd="@dimen/radius_sm"
+                app:boxCornerRadiusBottomStart="@dimen/radius_sm"
+                app:boxCornerRadiusBottomEnd="@dimen/radius_sm"
                 app:boxStrokeColor="@color/accent_gold"
                 app:hintTextColor="@color/text_secondary">
                 <com.google.android.material.textfield.TextInputEditText
@@ -226,32 +270,30 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="4dp"
+                android:layout_marginBottom="6dp"
                 android:text="@string/music_style"
                 android:textColor="@color/text_secondary"
-                android:textSize="13sp" />
+                android:textSize="13sp"
+                android:fontFamily="sans-serif-medium" />
 
             <Spinner
                 android:id="@+id/spinnerMusicStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
+                android:layout_marginBottom="26dp"
                 android:background="@drawable/bg_spinner"
-                android:paddingHorizontal="12dp"
+                android:paddingHorizontal="14dp"
                 android:paddingVertical="14dp"
                 android:textColor="@color/text_primary" />
 
             <!-- Preview Button -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnPreview"
+                style="@style/Widget.App.Button.Primary"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
-                android:backgroundTint="@color/accent_gold"
                 android:text="@string/preview_video"
-                android:textColor="@color/bg_dark"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                app:cornerRadius="12dp" />
+                android:textSize="16sp" />
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

@@ -6,11 +6,18 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.OnBackPressedCallback
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
+import com.google.android.gms.ads.AdSize
+import com.google.android.gms.ads.AdView
+import com.statusmaker.videoapp.ads.AdManager
 import com.statusmaker.videoapp.databinding.FragmentMyVideosBinding
+import com.statusmaker.videoapp.utils.PreferenceManager
+import kotlinx.coroutines.launch
 
 class MyVideosFragment : Fragment() {
 
@@ -20,6 +27,8 @@ class MyVideosFragment : Fragment() {
     private val viewModel: MyVideosViewModel by viewModels {
         MyVideosViewModel.Factory(requireContext())
     }
+
+    private var isPremiumUser = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentMyVideosBinding.inflate(inflater, container, false)
@@ -49,6 +58,55 @@ class MyVideosFragment : Fragment() {
             binding.emptyState.visibility  = if (files.isEmpty()) View.VISIBLE else View.GONE
             binding.rvMyVideos.visibility  = if (files.isEmpty()) View.GONE else View.VISIBLE
         }
+
+        observePremiumAndLoadAds()
+        setupBackPressInterstitial()
+    }
+
+    /** New revenue surface — see TemplateListFragment for the identical pattern. */
+    private fun observePremiumAndLoadAds() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            PreferenceManager(requireContext()).isPremium.collect { isPremium ->
+                isPremiumUser = isPremium
+                if (_binding == null) return@collect
+                if (isPremium) {
+                    binding.bannerAdContainer.removeAllViews()
+                    binding.bannerAdContainer.visibility = View.GONE
+                } else if (binding.bannerAdContainer.childCount == 0) {
+                    setupBannerAd()
+                }
+            }
+        }
+    }
+
+    private fun setupBannerAd() {
+        val adView = AdView(requireContext()).apply {
+            adUnitId = AdManager.BANNER_AD_UNIT
+            setAdSize(AdSize.BANNER)
+        }
+        binding.bannerAdContainer.addView(adView)
+        AdManager.getInstance(requireContext()).loadBannerAd(
+            adView,
+            onLoaded = { if (_binding != null) binding.bannerAdContainer.visibility = View.VISIBLE },
+            onFailed = { if (_binding != null) binding.bannerAdContainer.visibility = View.GONE }
+        )
+    }
+
+    /** New revenue surface — see TemplateListFragment for the identical pattern. */
+    private fun setupBackPressInterstitial() {
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    isEnabled = false
+                    if (isPremiumUser) {
+                        requireActivity().onBackPressedDispatcher.onBackPressed()
+                    } else {
+                        AdManager.getInstance(requireContext()).showInterstitialAd(requireActivity()) {
+                            requireActivity().onBackPressedDispatcher.onBackPressed()
+                        }
+                    }
+                }
+            })
     }
 
     private fun playVideo(path: String) {
@@ -91,7 +149,7 @@ class MyVideosFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        viewModel.loadVideos()  // refresh when coming back from export
+        viewModel.loadVideos()
     }
 
     override fun onDestroyView() {

@@ -4,14 +4,23 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.OnBackPressedCallback
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
+import com.google.android.gms.ads.AdSize
+import com.google.android.gms.ads.AdView
 import com.google.android.material.chip.Chip
+import com.statusmaker.videoapp.R
+import com.statusmaker.videoapp.ads.AdManager
 import com.statusmaker.videoapp.data.model.Template
 import com.statusmaker.videoapp.data.model.TemplateCategory
 import com.statusmaker.videoapp.databinding.FragmentTemplateListBinding
+import com.statusmaker.videoapp.utils.PreferenceManager
+import kotlinx.coroutines.launch
 
 class TemplateListFragment : Fragment() {
 
@@ -23,6 +32,7 @@ class TemplateListFragment : Fragment() {
     }
 
     private lateinit var templateAdapter: TemplateAdapter
+    private var isPremiumUser = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentTemplateListBinding.inflate(inflater, container, false)
@@ -42,8 +52,9 @@ class TemplateListFragment : Fragment() {
             adapter = templateAdapter
         }
 
-        // FIX #8: build chips ONCE at setup time, not on every category change
         buildCategoryChips()
+        observePremiumAndLoadAds()
+        setupBackPressInterstitial()
 
         viewModel.loadTemplates(initialCategory)
 
@@ -55,7 +66,6 @@ class TemplateListFragment : Fragment() {
 
         viewModel.selectedCategory.observe(viewLifecycleOwner) { cat ->
             binding.tvCategoryTitle.text = cat?.displayName ?: "All Templates"
-            // Update chip check state without recreating chips
             for (i in 0 until binding.chipGroupCategories.childCount) {
                 val chip = binding.chipGroupCategories.getChildAt(i) as? Chip ?: continue
                 val chipCategory = chip.tag as? TemplateCategory
@@ -63,28 +73,99 @@ class TemplateListFragment : Fragment() {
             }
         }
 
-        binding.toolbar.setNavigationOnClickListener { findNavController().navigateUp() }
+        binding.toolbar.setNavigationOnClickListener {
+            requireActivity().onBackPressedDispatcher.onBackPressed()
+        }
+    }
+
+    /**
+     * New revenue surface: a banner on the screen users browse templates on
+     * longest. Premium users never see it — the container is never even
+     * populated for them, so no ad request is made on their behalf either.
+     */
+    private fun observePremiumAndLoadAds() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            PreferenceManager(requireContext()).isPremium.collect { isPremium ->
+                isPremiumUser = isPremium
+                if (_binding == null) return@collect
+                if (isPremium) {
+                    binding.bannerAdContainer.removeAllViews()
+                    binding.bannerAdContainer.visibility = View.GONE
+                } else if (binding.bannerAdContainer.childCount == 0) {
+                    setupBannerAd()
+                }
+            }
+        }
+    }
+
+    private fun setupBannerAd() {
+        val adView = AdView(requireContext()).apply {
+            adUnitId = AdManager.BANNER_AD_UNIT
+            setAdSize(AdSize.BANNER)
+        }
+        binding.bannerAdContainer.addView(adView)
+        AdManager.getInstance(requireContext()).loadBannerAd(
+            adView,
+            onLoaded = { if (_binding != null) binding.bannerAdContainer.visibility = View.VISIBLE },
+            onFailed = { if (_binding != null) binding.bannerAdContainer.visibility = View.GONE }
+        )
+    }
+
+    /**
+     * New revenue surface: an interstitial on exiting this screen (browsing
+     * without converting to a created video). Shares the same 3-minute
+     * cooldown as every other interstitial trigger in the app, so adding
+     * this trigger point increases the *chance* one fires at a natural
+     * break, not the total frequency. Skipped entirely for premium users.
+     */
+    private fun setupBackPressInterstitial() {
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    isEnabled = false
+                    if (isPremiumUser) {
+                        requireActivity().onBackPressedDispatcher.onBackPressed()
+                    } else {
+                        AdManager.getInstance(requireContext()).showInterstitialAd(requireActivity()) {
+                            requireActivity().onBackPressedDispatcher.onBackPressed()
+                        }
+                    }
+                }
+            })
     }
 
     private fun buildCategoryChips() {
         binding.chipGroupCategories.removeAllViews()
 
-        // "All" chip
         val allChip = Chip(requireContext()).apply {
             text = "All"; tag = null; isCheckable = true; isChecked = true
+            applyChipStyle()
             setOnClickListener { viewModel.loadTemplates(null) }
         }
         binding.chipGroupCategories.addView(allChip)
 
-        // Category chips
         TemplateCategory.values().forEach { category ->
             val chip = Chip(requireContext()).apply {
                 text = "${category.emoji} ${category.displayName}"
                 tag = category; isCheckable = true
+                applyChipStyle()
                 setOnClickListener { viewModel.loadTemplates(category) }
             }
             binding.chipGroupCategories.addView(chip)
         }
+    }
+
+    /**
+     * Material's Chip only accepts a flat ColorStateList for its background
+     * (not an arbitrary gradient drawable), so selected/unselected states
+     * are driven by color selectors instead.
+     */
+    private fun Chip.applyChipStyle() {
+        chipBackgroundColor = ContextCompat.getColorStateList(requireContext(), R.color.chip_bg_selector)
+        setTextColor(ContextCompat.getColorStateList(requireContext(), R.color.chip_text_selector))
+        chipStrokeWidth = resources.displayMetrics.density   // 1dp
+        chipStrokeColor = ContextCompat.getColorStateList(requireContext(), R.color.chip_stroke_selector)
+        rippleColor = ContextCompat.getColorStateList(requireContext(), R.color.chip_stroke_selector)
     }
 
     private fun onTemplateSelected(template: Template) {
