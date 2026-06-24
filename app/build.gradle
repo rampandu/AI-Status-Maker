@@ -101,7 +101,7 @@ dependencies {
     implementation 'androidx.viewpager2:viewpager2:1.0.0'
 
     // Billing (Play Billing for premium)
-    implementation 'com.android.billingclient:billing-ktx:6.1.0'
+   // implementation 'com.android.billingclient:billing-ktx:7.1.1'
 
     // WorkManager (background video export)
     implementation 'androidx.work:work-runtime-ktx:2.9.0'
