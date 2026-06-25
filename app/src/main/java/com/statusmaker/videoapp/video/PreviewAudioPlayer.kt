@@ -32,13 +32,13 @@ class PreviewAudioPlayer(
         prepareJob = scope.launch(Dispatchers.IO) {
             try {
                 val sampleRate = AudioSynthesizer.SAMPLE_RATE
-                // Generate one loopable chunk
+                // Generate one loopable chunk — stereo interleaved [L,R,L,R,...]
                 val samples = AudioSynthesizer.generate(style, LOOP_DURATION_SEC)
                 val byteCount = samples.size * 2   // 16-bit = 2 bytes/sample
 
                 val minBuf = AudioTrack.getMinBufferSize(
                     sampleRate,
-                    AudioFormat.CHANNEL_OUT_MONO,
+                    AudioFormat.CHANNEL_OUT_STEREO,
                     AudioFormat.ENCODING_PCM_16BIT
                 )
                 val bufSize = maxOf(minBuf, byteCount)
@@ -54,7 +54,7 @@ class PreviewAudioPlayer(
                         AudioFormat.Builder()
                             .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
                             .setSampleRate(sampleRate)
-                            .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
+                            .setChannelMask(AudioFormat.CHANNEL_OUT_STEREO)
                             .build()
                     )
                     .setBufferSizeInBytes(bufSize)

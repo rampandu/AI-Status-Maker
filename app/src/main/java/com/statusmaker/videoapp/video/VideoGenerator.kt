@@ -29,7 +29,7 @@ class VideoGenerator(private val context: Context) {
         private const val VIDEO_BIT_RATE     = 3_000_000
         private const val I_FRAME_INTERVAL   = 1
         private const val AUDIO_SAMPLE_RATE  = AudioSynthesizer.SAMPLE_RATE
-        private const val AUDIO_CHANNELS     = 1
+        private const val AUDIO_CHANNELS     = 2   // stereo — see AudioSynthesizer.generate()
         private const val AUDIO_BIT_RATE     = 128_000
         private const val AUDIO_FRAME_SAMPLES = 1024   // AAC-LC frame size
     }
@@ -61,7 +61,10 @@ class VideoGenerator(private val context: Context) {
                 style           = userInput.musicStyle,
                 durationSeconds = template.durationSeconds
             )
-            val totalAudioSamples = musicSamples.size
+            // musicSamples is stereo-interleaved [L0,R0,L1,R1,...]; the encoder
+            // and PTS math need the per-channel FRAME count, not the raw
+            // interleaved array length (which is 2x that).
+            val totalAudioFrames = template.durationSeconds * AUDIO_SAMPLE_RATE
 
             emit(VideoGenState.Progress(12, "Setting up encoders…"))
 
@@ -106,7 +109,7 @@ class VideoGenerator(private val context: Context) {
             var videoFrameIndex    = 0
             var videoEos           = false
             var audioEos           = false
-            var audioSamplesQueued = 0
+            var audioFramesQueued = 0  // per-channel frame count, not raw array index
             var audioInputDone     = false
 
             videoEncoder.start()
@@ -164,20 +167,24 @@ class VideoGenerator(private val context: Context) {
                 if (!audioInputDone) {
                     val idx = audioEncoder.dequeueInputBuffer(0L)
                     if (idx >= 0) {
-                        if (audioSamplesQueued < totalAudioSamples) {
-                            val count = minOf(AUDIO_FRAME_SAMPLES,
-                                totalAudioSamples - audioSamplesQueued)
+                        if (audioFramesQueued < totalAudioFrames) {
+                            val framesToWrite = minOf(AUDIO_FRAME_SAMPLES,
+                                totalAudioFrames - audioFramesQueued)
                             val buf = audioEncoder.getInputBuffer(idx)!!
                             buf.clear()
-                            // Write shorts as bytes (little-endian PCM)
-                            for (i in 0 until count) {
-                                val s = musicSamples[audioSamplesQueued + i]
+                            // Stereo-interleaved: each frame is L+R, so the
+                            // raw array start offset is frame_index * 2.
+                            val startIdx = audioFramesQueued * AUDIO_CHANNELS
+                            val valuesToWrite = framesToWrite * AUDIO_CHANNELS
+                            for (i in 0 until valuesToWrite) {
+                                val s = musicSamples[startIdx + i]
                                 buf.put((s.toInt() and 0xFF).toByte())
                                 buf.put(((s.toInt() shr 8) and 0xFF).toByte())
                             }
-                            val pts = audioSamplesQueued * 1_000_000L / AUDIO_SAMPLE_RATE
-                            audioEncoder.queueInputBuffer(idx, 0, count * 2, pts, 0)
-                            audioSamplesQueued += count
+                            // PTS is frame-based (per-channel time), not raw-index-based
+                            val pts = audioFramesQueued * 1_000_000L / AUDIO_SAMPLE_RATE
+                            audioEncoder.queueInputBuffer(idx, 0, valuesToWrite * 2, pts, 0)
+                            audioFramesQueued += framesToWrite
                         } else {
                             audioEncoder.getInputBuffer(idx)!!.clear()
                             audioEncoder.queueInputBuffer(
