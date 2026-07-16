@@ -39,6 +39,7 @@ class PreviewFragment : Fragment() {
     }
 
     private var exportedFilePath: String? = null
+    private var selectedMusicStyle = MusicStyle.NONE
     private var previewAudioPlayer: PreviewAudioPlayer? = null
     private var audioReady = false
     private var exoPlayer: ExoPlayer? = null
@@ -67,6 +68,7 @@ class PreviewFragment : Fragment() {
         val args           = arguments ?: return
         val templateId     = args.getString("templateId") ?: return
         val musicStyle     = MusicStyle.values()[args.getInt("musicStyleOrdinal", 0)]
+        selectedMusicStyle = musicStyle
 
         val userInput = UserInput(
             personName     = args.getString("personName") ?: "",
@@ -179,7 +181,9 @@ class PreviewFragment : Fragment() {
         viewModel.template.observe(viewLifecycleOwner) { t ->
             t ?: return@observe
             binding.tvPreviewTemplateName.text = t.name
-            binding.tvPreviewCategory.text     = "${t.category.emoji} ${t.category.displayName}"
+            binding.tvPreviewCategory.text =
+                "${t.category.emoji} ${t.category.displayName}  •  " +
+                "${selectedMusicStyle.emoji} ${selectedMusicStyle.displayName}"
         }
 
         viewModel.exportState.observe(viewLifecycleOwner) { state ->

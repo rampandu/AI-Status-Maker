@@ -96,13 +96,13 @@ data class FavoriteTemplate(
 
 // ─── Enums ────────────────────────────────────────────────────────────────────
 
-enum class MusicStyle(val displayName: String, val teluguName: String) {
-    CLASSICAL("Classical", "శాస్త్రీయ సంగీతం"),
-    FOLK("Folk / Janapada", "జానపద"),
-    DEVOTIONAL("Devotional / Bhakti", "భక్తి"),
-    FILMY("Filmy / Tollywood", "టాలీవుడ్"),
-    INSTRUMENTAL("Instrumental", "వాద్య సంగీతం"),
-    NONE("No Music", "సంగీతం లేదు")
+enum class MusicStyle(val displayName: String, val teluguName: String, val emoji: String) {
+    CLASSICAL("Classical", "శాస్త్రీయ సంగీతం", "🎻"),
+    FOLK("Folk / Janapada", "జానపద", "🥁"),
+    DEVOTIONAL("Devotional / Bhakti", "భక్తి", "🪔"),
+    FILMY("Filmy / Tollywood", "టాలీవుడ్", "🎬"),
+    INSTRUMENTAL("Instrumental", "వాద్య సంగీతం", "🎹"),
+    NONE("No Music", "సంగీతం లేదు", "🔇")
 }
 
 enum class FontStyle(val displayName: String) {

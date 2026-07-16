@@ -8,16 +8,19 @@ import com.statusmaker.videoapp.data.model.MusicStyle
 import kotlinx.coroutines.*
 
 /**
- * Streams synthesized audio via AudioTrack during preview and export.
- * Generates one pattern loop (~4s), then loops it indefinitely using
- * AudioTrack.setLoopPoints() for zero-copy gapless repetition.
+ * Streams synthesized audio via AudioTrack during preview.
+ * Generates one bar-exact groove cycle (a whole number of musical phrases,
+ * ~14-25 s depending on tempo), then loops it indefinitely using
+ * AudioTrack.setLoopPoints() for zero-copy gapless repetition. Using the
+ * phrase-aligned loop keeps fills/sections intact — the old fixed 4 s buffer
+ * cut phrases off mid-bar, which sounded broken.
  */
 class PreviewAudioPlayer(
     private val style: MusicStyle
 ) {
     companion object {
         private const val TAG = "PreviewAudioPlayer"
-        private const val LOOP_DURATION_SEC = 4   // generate 4 s and loop
+        private const val AUDIO_CHANNELS = 2   // stereo — see AudioSynthesizer.generate()
     }
 
     private var audioTrack: AudioTrack? = null
@@ -33,7 +36,7 @@ class PreviewAudioPlayer(
             try {
                 val sampleRate = AudioSynthesizer.SAMPLE_RATE
                 // Generate one loopable chunk — stereo interleaved [L,R,L,R,...]
-                val samples = AudioSynthesizer.generate(style, LOOP_DURATION_SEC)
+                val samples = AudioSynthesizer.generateLoop(style)
                 val byteCount = samples.size * 2   // 16-bit = 2 bytes/sample
 
                 val minBuf = AudioTrack.getMinBufferSize(
@@ -62,8 +65,10 @@ class PreviewAudioPlayer(
                     .build()
 
                 track.write(samples, 0, samples.size)
-                // Loop the entire buffer indefinitely (-1 = infinite)
-                track.setLoopPoints(0, samples.size, -1)
+                // Loop the entire buffer indefinitely (-1 = infinite).
+                // setLoopPoints() takes FRAMES — for stereo 16-bit that is
+                // half the interleaved short-array length.
+                track.setLoopPoints(0, samples.size / AUDIO_CHANNELS, -1)
 
                 audioTrack = track
                 ready = true

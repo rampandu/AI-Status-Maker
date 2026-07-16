@@ -17,13 +17,16 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
+import com.google.android.material.chip.Chip
 import com.statusmaker.videoapp.R
 import com.statusmaker.videoapp.data.model.FestivalPresets
 import com.statusmaker.videoapp.data.model.MusicStyle
 import com.statusmaker.videoapp.data.model.UserInput
 import com.statusmaker.videoapp.databinding.FragmentEditorBinding
+import com.statusmaker.videoapp.video.PreviewAudioPlayer
 
 class EditorFragment : Fragment() {
 
@@ -35,6 +38,11 @@ class EditorFragment : Fragment() {
     }
 
     private var selectedPhotoUri: Uri? = null
+
+    // Music picker + audition state
+    private var selectedMusicStyle = MusicStyle.CLASSICAL
+    private var auditionPlayer: PreviewAudioPlayer? = null
+    private var auditioning = false
 
     // FIX #13: Permission launcher before photo picker
     private val permissionLauncher = registerForActivityResult(
@@ -87,13 +95,7 @@ class EditorFragment : Fragment() {
             ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, FestivalPresets.list)
         )
 
-        // Music spinner
-        val styles = MusicStyle.values()
-        binding.spinnerMusicStyle.adapter = ArrayAdapter(
-            requireContext(),
-            android.R.layout.simple_spinner_item,
-            styles.map { "🎵 ${it.displayName}  •  ${it.teluguName}" }
-        ).also { it.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) }
+        setupMusicPicker()
 
         binding.btnPreview.setOnClickListener {
             val input = buildUserInput() ?: return@setOnClickListener
@@ -117,6 +119,75 @@ class EditorFragment : Fragment() {
         }
 
         binding.toolbar.setNavigationOnClickListener { findNavController().navigateUp() }
+    }
+
+    // ─── Music style chips + audition ────────────────────────────────────────
+
+    private fun setupMusicPicker() {
+        val group = binding.chipGroupMusic
+        group.removeAllViews()
+        for (style in MusicStyle.values()) {
+            val chip = Chip(requireContext()).apply {
+                id = View.generateViewId()
+                tag = style
+                text = "${style.emoji} ${style.displayName}"
+                isCheckable = true
+                isCheckedIconVisible = false
+                chipBackgroundColor =
+                    ContextCompat.getColorStateList(requireContext(), R.color.chip_music_bg)
+                chipStrokeColor =
+                    ContextCompat.getColorStateList(requireContext(), R.color.chip_music_stroke)
+                chipStrokeWidth = resources.displayMetrics.density
+                setTextColor(
+                    ContextCompat.getColorStateList(requireContext(), R.color.chip_music_text))
+            }
+            group.addView(chip)
+            if (style == selectedMusicStyle) chip.isChecked = true
+        }
+        group.setOnCheckedStateChangeListener { g, checkedIds ->
+            val checked = checkedIds.firstOrNull() ?: return@setOnCheckedStateChangeListener
+            val style = g.findViewById<Chip>(checked)?.tag as? MusicStyle
+                ?: return@setOnCheckedStateChangeListener
+            if (style != selectedMusicStyle) {
+                selectedMusicStyle = style
+                binding.btnAuditionMusic.isEnabled = style != MusicStyle.NONE
+                val wasListening = auditioning
+                stopAudition()
+                if (wasListening && style != MusicStyle.NONE) startAudition()
+            }
+        }
+        binding.btnAuditionMusic.setOnClickListener {
+            if (auditioning) stopAudition() else startAudition()
+        }
+    }
+
+    private fun checkMusicChip(style: MusicStyle) {
+        for (i in 0 until binding.chipGroupMusic.childCount) {
+            val chip = binding.chipGroupMusic.getChildAt(i) as? Chip ?: continue
+            if (chip.tag == style) { chip.isChecked = true; break }
+        }
+    }
+
+    private fun startAudition() {
+        if (selectedMusicStyle == MusicStyle.NONE) return
+        stopAudition()
+        auditioning = true
+        binding.btnAuditionMusic.text = "⏳ Loading…"
+        val player = PreviewAudioPlayer(selectedMusicStyle)
+        auditionPlayer = player
+        player.prepare(viewLifecycleOwner.lifecycleScope) {
+            if (_binding != null && auditioning && auditionPlayer === player) {
+                player.play()
+                binding.btnAuditionMusic.text = "⏹  Stop"
+            }
+        }
+    }
+
+    private fun stopAudition() {
+        auditioning = false
+        auditionPlayer?.release()
+        auditionPlayer = null
+        _binding?.btnAuditionMusic?.text = "▶  Listen"
     }
 
     private fun checkPermissionAndPick() {
@@ -169,10 +240,8 @@ class EditorFragment : Fragment() {
                 }
             }
 
-            // Pre-select matching music style
-            val defaultStyle = template.musicStyle
-            val idx = MusicStyle.values().indexOfFirst { it == defaultStyle }
-            if (idx >= 0) binding.spinnerMusicStyle.setSelection(idx)
+            // Pre-select the template's recommended music style
+            checkMusicChip(template.musicStyle)
         }
     }
 
@@ -190,7 +259,6 @@ class EditorFragment : Fragment() {
         }
         binding.tilPersonName.error = null
 
-        val music = MusicStyle.values()[binding.spinnerMusicStyle.selectedItemPosition]
         return UserInput(
             personName    = name,
             personPhotoUri = selectedPhotoUri?.toString(),
@@ -198,12 +266,18 @@ class EditorFragment : Fragment() {
             businessName  = biz,
             festivalName  = fest,
             customMessage = msg,
-            musicStyle    = music
+            musicStyle    = selectedMusicStyle
         )
+    }
+
+    override fun onPause() {
+        super.onPause()
+        stopAudition()
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
+        stopAudition()
         _binding = null
     }
 }

@@ -278,25 +278,52 @@
                     android:textColor="@color/text_primary" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Music Style -->
-            <TextView
-                android:layout_width="wrap_content"
+            <!-- Music Style — chip picker + audition button so users can hear
+                 each style before generating the video -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="6dp"
-                android:text="@string/music_style"
-                android:textColor="@color/text_secondary"
-                android:textSize="13sp"
-                android:fontFamily="sans-serif-medium" />
+                android:layout_marginBottom="4dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
 
-            <Spinner
-                android:id="@+id/spinnerMusicStyle"
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/music_style"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="13sp"
+                    android:fontFamily="sans-serif-medium" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnAuditionMusic"
+                    style="@style/Widget.App.Button.Outline"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:minWidth="0dp"
+                    android:paddingHorizontal="14dp"
+                    android:text="▶  Listen"
+                    android:textColor="@color/accent_gold"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <HorizontalScrollView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="26dp"
-                android:background="@drawable/bg_spinner"
-                android:paddingHorizontal="14dp"
-                android:paddingVertical="14dp"
-                android:textColor="@color/text_primary" />
+                android:scrollbars="none"
+                android:clipToPadding="false">
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/chipGroupMusic"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:singleSelection="true"
+                    app:selectionRequired="true"
+                    app:singleLine="true"
+                    app:chipSpacingHorizontal="8dp" />
+            </HorizontalScrollView>
 
             <!-- Preview Button -->
             <com.google.android.material.button.MaterialButton
