@@ -12,8 +12,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
-import com.google.android.gms.ads.AdSize
-import com.google.android.gms.ads.AdView
 import com.statusmaker.videoapp.ads.AdManager
 import com.statusmaker.videoapp.databinding.FragmentMyVideosBinding
 import com.statusmaker.videoapp.utils.PreferenceManager
@@ -80,13 +78,8 @@ class MyVideosFragment : Fragment() {
     }
 
     private fun setupBannerAd() {
-        val adView = AdView(requireContext()).apply {
-            adUnitId = AdManager.BANNER_AD_UNIT
-            setAdSize(AdSize.BANNER)
-        }
-        binding.bannerAdContainer.addView(adView)
-        AdManager.getInstance(requireContext()).loadBannerAd(
-            adView,
+        AdManager.getInstance(requireContext()).attachAdaptiveBanner(
+            binding.bannerAdContainer,
             onLoaded = { if (_binding != null) binding.bannerAdContainer.visibility = View.VISIBLE },
             onFailed = { if (_binding != null) binding.bannerAdContainer.visibility = View.GONE }
         )

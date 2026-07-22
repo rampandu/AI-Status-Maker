@@ -5,7 +5,9 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.view.ViewGroup
 import com.google.android.gms.ads.*
+import com.statusmaker.videoapp.BuildConfig
 import com.google.android.gms.ads.appopen.AppOpenAd
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
@@ -23,14 +25,27 @@ class AdManager private constructor(private val context: Context) {
         // serving a stale cached ad past that window has a high show-failure rate.
         private const val APP_OPEN_AD_MAX_AGE_MS = 4 * 60 * 60 * 1000L
 
-        // ── Replace these with real Ad Unit IDs before release ───────────────
-        const val BANNER_AD_UNIT    = "ca-app-pub-9535310271167305/1410870345"
-        const val INTERSTITIAL_ID   = "ca-app-pub-9535310271167305/4104939141"
-        const val REWARDED_AD_UNIT  = "ca-app-pub-9535310271167305/2671981128"
-        // App Open ad unit — create this in AdMob console (Ad format: App Open)
-        // and replace before release. Using Google's public test unit for now
-        // so the flow can be verified before the real unit is approved.
-        const val APP_OPEN_AD_UNIT  = "ca-app-pub-9535310271167305/8281894822"
+        // ── Production ad units (used only in release builds) ────────────────
+        private const val PROD_BANNER       = "ca-app-pub-9535310271167305/1410870345"
+        private const val PROD_INTERSTITIAL = "ca-app-pub-9535310271167305/4104939141"
+        private const val PROD_REWARDED     = "ca-app-pub-9535310271167305/2671981128"
+        private const val PROD_APP_OPEN     = "ca-app-pub-9535310271167305/8281894822"
+
+        // ── Google's public sample ad units — used in debug builds ───────────
+        // Test ads ALWAYS fill, so ads are actually visible during development,
+        // and requesting real ads from dev builds (an AdMob policy violation
+        // that can get the account limited) is avoided. Real units frequently
+        // no-fill on unregistered dev devices, which is why banners appeared
+        // "not to work" while debugging.
+        private const val TEST_BANNER       = "ca-app-pub-3940256099942544/6300978111"
+        private const val TEST_INTERSTITIAL = "ca-app-pub-3940256099942544/1033173712"
+        private const val TEST_REWARDED     = "ca-app-pub-3940256099942544/5224354917"
+        private const val TEST_APP_OPEN     = "ca-app-pub-3940256099942544/9257395921"
+
+        val BANNER_AD_UNIT   = if (BuildConfig.DEBUG) TEST_BANNER else PROD_BANNER
+        val INTERSTITIAL_ID  = if (BuildConfig.DEBUG) TEST_INTERSTITIAL else PROD_INTERSTITIAL
+        val REWARDED_AD_UNIT = if (BuildConfig.DEBUG) TEST_REWARDED else PROD_REWARDED
+        val APP_OPEN_AD_UNIT = if (BuildConfig.DEBUG) TEST_APP_OPEN else PROD_APP_OPEN
 
         @Volatile private var instance: AdManager? = null
         fun getInstance(context: Context): AdManager =
@@ -177,6 +192,31 @@ class AdManager private constructor(private val context: Context) {
     }
 
     // ── Banner ────────────────────────────────────────────────────────────────
+
+    /**
+     * One-call banner setup shared by all screens: creates an ADAPTIVE banner
+     * sized to the actual screen width (better fill rate + full-width look
+     * vs. the old fixed 320×50 AdSize.BANNER), attaches it to [container]
+     * and starts loading. Returns the AdView so callers can pause/destroy it.
+     */
+    fun attachAdaptiveBanner(
+        container: ViewGroup,
+        onLoaded: () -> Unit = {},
+        onFailed: (String) -> Unit = {}
+    ): AdView {
+        val ctx = container.context
+        val metrics = ctx.resources.displayMetrics
+        val widthPx = if (container.width > 0) container.width.toFloat() else metrics.widthPixels.toFloat()
+        val adWidthDp = (widthPx / metrics.density).toInt().coerceAtLeast(320)
+        val adView = AdView(ctx).apply {
+            adUnitId = BANNER_AD_UNIT
+            setAdSize(AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(ctx, adWidthDp))
+        }
+        container.removeAllViews()
+        container.addView(adView)
+        loadBannerAd(adView, onLoaded, onFailed)
+        return adView
+    }
 
     /**
      * FIX: previously a failed banner load was completely silent. Now logs

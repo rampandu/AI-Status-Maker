@@ -26,6 +26,15 @@
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="${admobAppId}" />
 
+        <!-- Android 16 (targetSdk 36) ignores orientation/resizability locks
+             on 600dp+ screens. This app's video templates and screens are
+             portrait-designed, so temporarily opt out on large screens until
+             adaptive layouts are added. (Sanctioned opt-out; removed by the
+             platform in a future release.) -->
+        <property
+            android:name="android.window.PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY"
+            android:value="true" />
+
         <!-- Splash Activity -->
         <activity
             android:name=".SplashActivity"

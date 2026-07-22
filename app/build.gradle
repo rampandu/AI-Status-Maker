@@ -8,13 +8,15 @@ plugins {
 
 android {
     namespace 'com.statusmaker.videoapp'
-    compileSdk 35
+    compileSdk 36
 
     defaultConfig {
         applicationId "com.statusmaker.videoapp"
         minSdk 24
-        targetSdk 35
-        versionCode 10
+        // Google Play compliance: apps must target Android 16 (API 36)
+        // to remain updatable after Aug 31, 2026.
+        targetSdk 36
+        versionCode 11
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
@@ -23,6 +25,12 @@ android {
     }
 
     buildTypes {
+        debug {
+            // Google's sample AdMob App ID — pairs with the sample ad units
+            // AdManager uses in debug builds, so test ads always display
+            // during development. Release keeps the real ID from defaultConfig.
+            manifestPlaceholders = [admobAppId: "ca-app-pub-3940256099942544~3347511713"]
+        }
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'

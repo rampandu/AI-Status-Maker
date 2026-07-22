@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
+<!-- Structure: toolbar / scrollable preview content / PINNED bottom action
+     bar. Export + progress + share live in the pinned bar so they are always
+     visible — previously they sat below the (very tall) 9:16 preview inside
+     the scroll view and were off-screen on every phone. -->
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     android:background="@color/bg_dark">
 
     <com.google.android.material.appbar.AppBarLayout
@@ -27,8 +32,8 @@
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        android:layout_height="0dp"
+        android:layout_weight="1">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -36,11 +41,12 @@
             android:orientation="vertical"
             android:padding="18dp">
 
-            <!-- Preview Card: animated frame preview BEFORE export, ExoPlayer AFTER export -->
+            <!-- Preview Card: animated frame preview BEFORE export, ExoPlayer AFTER export.
+                 Height is capped so the action bar below always has room. -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="18dp"
+                android:layout_marginBottom="14dp"
                 app:cardCornerRadius="@dimen/radius_lg"
                 app:cardElevation="0dp"
                 app:strokeColor="@color/hairline"
@@ -57,6 +63,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:adjustViewBounds="true"
+                        android:maxHeight="420dp"
                         android:scaleType="fitCenter"
                         android:minHeight="240dp"
                         android:background="@color/bg_dark" />
@@ -65,9 +72,9 @@
                     <androidx.media3.ui.PlayerView
                         android:id="@+id/playerView"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:minHeight="240dp"
+                        android:layout_height="420dp"
                         android:visibility="gone"
+                        app:resize_mode="fit"
                         app:show_buffering="when_playing"
                         app:use_controller="true"
                         app:hide_on_touch="false"
@@ -97,7 +104,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="12dp"
                 android:gravity="center_vertical">
 
                 <TextView
@@ -127,7 +134,6 @@
                 android:id="@+id/cardAdNotice"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="14dp"
                 app:cardBackgroundColor="@color/surface_overlay"
                 app:cardCornerRadius="@dimen/radius_sm"
                 app:cardElevation="0dp"
@@ -143,12 +149,34 @@
                     android:textSize="12sp" />
             </com.google.android.material.card.MaterialCardView>
 
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- ── Pinned bottom action bar — always visible ─────────────────────── -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@color/bg_dark">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/hairline" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="18dp"
+            android:paddingVertical="12dp">
+
             <!-- Export Progress -->
             <LinearLayout
                 android:id="@+id/exportProgress"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="14dp"
+                android:layout_marginBottom="10dp"
                 android:orientation="vertical"
                 android:visibility="gone">
 
@@ -176,7 +204,6 @@
                 style="@style/Widget.App.Button.Primary"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
-                android:layout_marginBottom="14dp"
                 android:text="🎬 Export Video"
                 android:textSize="16sp" />
 
@@ -185,6 +212,7 @@
                 android:id="@+id/exportSuccessGroup"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
                 android:orientation="vertical"
                 android:visibility="gone">
 
@@ -241,6 +269,6 @@
             </LinearLayout>
 
         </LinearLayout>
-    </androidx.core.widget.NestedScrollView>
+    </LinearLayout>
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+</LinearLayout>

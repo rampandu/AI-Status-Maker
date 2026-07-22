@@ -50,7 +50,6 @@ class HomeSectionsAdapter(
         init {
             rv.layoutManager = LinearLayoutManager(view.context, LinearLayoutManager.HORIZONTAL, false)
             rv.adapter = innerAdapter
-            rv.setHasFixedSize(true)
         }
     }
 
