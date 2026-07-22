@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.gms.ads.nativead.NativeAd
 import com.statusmaker.videoapp.R
 import com.statusmaker.videoapp.ads.AdManager
 import com.statusmaker.videoapp.data.model.CategorySection
@@ -26,6 +27,8 @@ class HomeFragment : Fragment() {
     private val viewModel: HomeViewModel by viewModels { HomeViewModel.Factory(requireContext()) }
     private var glowAnimator: ObjectAnimator? = null
     private lateinit var sectionsAdapter: HomeSectionsAdapter
+    private var nativeAd: NativeAd? = null
+    private var nativeAdRequested = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
@@ -118,10 +121,28 @@ class HomeFragment : Fragment() {
             if (isPremium) {
                 binding.bannerAdContainer.removeAllViews()
                 binding.bannerAdContainer.visibility = View.GONE
-            } else if (binding.bannerAdContainer.childCount == 0) {
-                setupBannerAd()
+                sectionsAdapter.setNativeAd(null)
+                nativeAd?.destroy(); nativeAd = null
+            } else {
+                if (binding.bannerAdContainer.childCount == 0) setupBannerAd()
+                loadNativeFeedAd()
             }
         }
+    }
+
+    /** One in-feed native ad card after the second section (free users only). */
+    private fun loadNativeFeedAd() {
+        if (nativeAdRequested) return
+        nativeAdRequested = true
+        AdManager.getInstance(requireContext()).loadNativeAd(
+            onLoaded = { ad ->
+                if (_binding == null) { ad.destroy(); return@loadNativeAd }
+                nativeAd?.destroy()
+                nativeAd = ad
+                sectionsAdapter.setNativeAd(ad)
+            },
+            onFailed = { nativeAdRequested = false }
+        )
     }
 
     private fun setupBannerAd() {
@@ -136,6 +157,9 @@ class HomeFragment : Fragment() {
         super.onDestroyView()
         glowAnimator?.cancel()
         glowAnimator = null
+        nativeAd?.destroy()
+        nativeAd = null
+        nativeAdRequested = false
         _binding = null
     }
 }

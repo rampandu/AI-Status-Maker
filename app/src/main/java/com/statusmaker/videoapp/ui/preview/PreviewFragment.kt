@@ -216,6 +216,15 @@ class PreviewFragment : Fragment() {
 
         viewModel.isPremium.observe(viewLifecycleOwner) { isPremium ->
             binding.cardAdNotice.visibility = if (isPremium) View.GONE else View.VISIBLE
+            if (!isPremium) {
+                // Warm the ads THIS screen shows — rewarded (export) and
+                // interstitial (Edit Again) — instead of app-launch preloads.
+                // By the time the user taps Export, the rewarded ad is ready
+                // and the 8-second "Loading ad…" wait rarely happens.
+                val adManager = AdManager.getInstance(requireContext())
+                adManager.loadRewardedAd()
+                adManager.loadInterstitialAd()
+            }
         }
     }
 

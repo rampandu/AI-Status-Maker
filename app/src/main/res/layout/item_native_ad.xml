@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- In-feed native ad card for the Home discovery feed. Uses NativeAdView so
+     AdMob handles impression/click tracking; the "Ad" badge is mandatory. -->
+<com.google.android.gms.ads.nativead.NativeAdView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nativeAdView"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingHorizontal="20dp"
+    android:paddingVertical="8dp">
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardBackgroundColor="@color/surface_dark"
+        app:cardCornerRadius="@dimen/radius_md"
+        app:cardElevation="0dp"
+        app:strokeColor="@color/hairline"
+        app:strokeWidth="1dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="12dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/tvAdBadge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_duration_pill"
+                    android:paddingHorizontal="6dp"
+                    android:paddingVertical="2dp"
+                    android:text="Ad"
+                    android:textColor="@color/accent_gold"
+                    android:textSize="10sp"
+                    android:fontFamily="sans-serif-medium" />
+
+                <ImageView
+                    android:id="@+id/ivAdIcon"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_marginStart="8dp"
+                    android:contentDescription="Ad icon" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="10dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tvAdHeadline"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/text_primary"
+                        android:textSize="14sp"
+                        android:fontFamily="sans-serif-medium"
+                        android:maxLines="1"
+                        android:ellipsize="end" />
+
+                    <TextView
+                        android:id="@+id/tvAdBody"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="12sp"
+                        android:maxLines="2"
+                        android:ellipsize="end" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <com.google.android.gms.ads.nativead.MediaView
+                android:id="@+id/mvAdMedia"
+                android:layout_width="match_parent"
+                android:layout_height="160dp"
+                android:layout_marginTop="10dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnAdCta"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:layout_marginTop="10dp"
+                android:backgroundTint="@color/accent_gold"
+                android:textColor="@color/bg_dark"
+                android:textSize="14sp"
+                app:cornerRadius="@dimen/radius_sm" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+</com.google.android.gms.ads.nativead.NativeAdView>

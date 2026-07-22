@@ -7,6 +7,8 @@ import android.os.Looper
 import android.util.Log
 import android.view.ViewGroup
 import com.google.android.gms.ads.*
+import com.google.android.gms.ads.nativead.NativeAd
+import com.google.android.gms.ads.nativead.NativeAdOptions
 import com.statusmaker.videoapp.BuildConfig
 import com.google.android.gms.ads.appopen.AppOpenAd
 import com.google.android.gms.ads.interstitial.InterstitialAd
@@ -30,6 +32,7 @@ class AdManager private constructor(private val context: Context) {
         private const val PROD_INTERSTITIAL = "ca-app-pub-9535310271167305/4104939141"
         private const val PROD_REWARDED     = "ca-app-pub-9535310271167305/2671981128"
         private const val PROD_APP_OPEN     = "ca-app-pub-9535310271167305/8281894822"
+        private const val PROD_NATIVE       = "ca-app-pub-9535310271167305/3409699295"
 
         // ── Google's public sample ad units — used in debug builds ───────────
         // Test ads ALWAYS fill, so ads are actually visible during development,
@@ -41,11 +44,13 @@ class AdManager private constructor(private val context: Context) {
         private const val TEST_INTERSTITIAL = "ca-app-pub-3940256099942544/1033173712"
         private const val TEST_REWARDED     = "ca-app-pub-3940256099942544/5224354917"
         private const val TEST_APP_OPEN     = "ca-app-pub-3940256099942544/9257395921"
+        private const val TEST_NATIVE       = "ca-app-pub-3940256099942544/2247696110"
 
         val BANNER_AD_UNIT   = if (BuildConfig.DEBUG) TEST_BANNER else PROD_BANNER
         val INTERSTITIAL_ID  = if (BuildConfig.DEBUG) TEST_INTERSTITIAL else PROD_INTERSTITIAL
         val REWARDED_AD_UNIT = if (BuildConfig.DEBUG) TEST_REWARDED else PROD_REWARDED
         val APP_OPEN_AD_UNIT = if (BuildConfig.DEBUG) TEST_APP_OPEN else PROD_APP_OPEN
+        val NATIVE_AD_UNIT   = if (BuildConfig.DEBUG) TEST_NATIVE else PROD_NATIVE
 
         @Volatile private var instance: AdManager? = null
         fun getInstance(context: Context): AdManager =
@@ -57,6 +62,7 @@ class AdManager private constructor(private val context: Context) {
     private var rewardedAd: RewardedAd? = null
     private var interstitialAd: InterstitialAd? = null
     private var isRewardedLoading = false
+    private var isInterstitialLoading = false
     private var lastInterstitialTime = 0L
 
     private val pendingRewardedCallbacks = mutableListOf<Pair<() -> Unit, (String) -> Unit>>()
@@ -78,9 +84,17 @@ class AdManager private constructor(private val context: Context) {
         pendingBannerLoads.clear()
     }
 
+    /**
+     * SHOW-RATE FIX: this used to also preload a rewarded + interstitial on
+     * every app launch, but most sessions never reached a screen that shows
+     * them — AdMob reported a 13% show rate (loads that never display),
+     * which drags eCPM down over time. Rewarded/interstitial ads are now
+     * loaded on demand by the screens that actually show them (Preview,
+     * Templates, My Videos, Favorites). Only the App Open ad stays here,
+     * because it must already be cached when the next cold start happens
+     * (and its own guard reuses a cached ad for up to 4 h).
+     */
     fun preloadAds() {
-        loadRewardedAd()
-        loadInterstitialAd()
         loadAppOpenAd()
     }
 
@@ -146,14 +160,21 @@ class AdManager private constructor(private val context: Context) {
     // ── Interstitial Ad ───────────────────────────────────────────────────────
 
     fun loadInterstitialAd() {
+        // Guard against duplicate requests — screens call this on entry, and
+        // an already-cached ad must not be thrown away and re-requested
+        // (every discarded load is another unshown impression opportunity).
+        if (interstitialAd != null || isInterstitialLoading) return
+        isInterstitialLoading = true
         InterstitialAd.load(context, INTERSTITIAL_ID, AdRequest.Builder().build(),
             object : InterstitialAdLoadCallback() {
                 override fun onAdLoaded(ad: InterstitialAd) {
                     interstitialAd = ad
+                    isInterstitialLoading = false
                     Log.d(TAG, "Interstitial loaded")
                 }
                 override fun onAdFailedToLoad(e: LoadAdError) {
                     interstitialAd = null
+                    isInterstitialLoading = false
                     Log.w(TAG, "Interstitial failed [${e.code}]: ${e.message}")
                 }
             })
@@ -255,6 +276,45 @@ class AdManager private constructor(private val context: Context) {
             return
         }
         adView.loadAd(AdRequest.Builder().build())
+    }
+
+    // ── Native Ad ─────────────────────────────────────────────────────────────
+
+    /**
+     * Loads one Native Advanced ad for in-feed placement (Home). Native ads
+     * blend into the content feed and typically out-earn banners several
+     * times over. No-ops in release until a real native ad unit ID is set
+     * (PROD_NATIVE above). Caller owns the returned ad and MUST call
+     * NativeAd.destroy() when the hosting view goes away.
+     */
+    fun loadNativeAd(onLoaded: (NativeAd) -> Unit, onFailed: (String) -> Unit = {}) {
+        if (NATIVE_AD_UNIT.isBlank()) {
+            Log.d(TAG, "Native ad unit not configured — skipping")
+            onFailed("Native ad unit not configured")
+            return
+        }
+        val loader = AdLoader.Builder(context, NATIVE_AD_UNIT)
+            .forNativeAd { ad -> Log.d(TAG, "Native ad loaded"); onLoaded(ad) }
+            .withAdListener(object : AdListener() {
+                override fun onAdFailedToLoad(error: LoadAdError) {
+                    Log.w(TAG, "Native failed [${error.code}]: ${error.message}")
+                    onFailed(error.message)
+                }
+            })
+            .withNativeAdOptions(
+                NativeAdOptions.Builder()
+                    .setAdChoicesPlacement(NativeAdOptions.ADCHOICES_TOP_RIGHT)
+                    .build()
+            )
+            .build()
+        if (!isSdkInitialized) {
+            Log.d(TAG, "SDK not ready yet — deferring native load")
+            Handler(Looper.getMainLooper()).postDelayed({
+                loader.loadAd(AdRequest.Builder().build())
+            }, 2_000L)
+            return
+        }
+        loader.loadAd(AdRequest.Builder().build())
     }
 
     // ── App Open Ad ────────────────────────────────────────────────────────────

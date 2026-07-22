@@ -16,7 +16,7 @@ android {
         // Google Play compliance: apps must target Android 16 (API 36)
         // to remain updatable after Aug 31, 2026.
         targetSdk 36
-        versionCode 11
+        versionCode 12
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 

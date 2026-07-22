@@ -70,8 +70,11 @@ class MyVideosFragment : Fragment() {
                 if (isPremium) {
                     binding.bannerAdContainer.removeAllViews()
                     binding.bannerAdContainer.visibility = View.GONE
-                } else if (binding.bannerAdContainer.childCount == 0) {
-                    setupBannerAd()
+                } else {
+                    // Warm the exit interstitial here — on the screen that
+                    // shows it — instead of preloading at app launch.
+                    AdManager.getInstance(requireContext()).loadInterstitialAd()
+                    if (binding.bannerAdContainer.childCount == 0) setupBannerAd()
                 }
             }
         }
