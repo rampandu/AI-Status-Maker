@@ -26,6 +26,7 @@
     <color name="cat_baby">#3FC0C7</color>
     <color name="cat_wedding">#E0578E</color>
     <color name="cat_business">#3FC78A</color>
+    <color name="cat_housewarming">#C97B4A</color>
 
     <!-- ── New quote-mood category accents ──────────────────────────────────── -->
     <color name="cat_good_morning">#FFA94D</color>

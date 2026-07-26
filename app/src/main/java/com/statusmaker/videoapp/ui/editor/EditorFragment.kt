@@ -22,10 +22,12 @@ import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.google.android.material.chip.Chip
 import com.statusmaker.videoapp.R
+import com.statusmaker.videoapp.data.model.AppLanguage
 import com.statusmaker.videoapp.data.model.FestivalPresets
 import com.statusmaker.videoapp.data.model.MusicStyle
 import com.statusmaker.videoapp.data.model.UserInput
 import com.statusmaker.videoapp.databinding.FragmentEditorBinding
+import com.statusmaker.videoapp.utils.AppLanguageStore
 import com.statusmaker.videoapp.video.PreviewAudioPlayer
 
 class EditorFragment : Fragment() {
@@ -92,7 +94,8 @@ class EditorFragment : Fragment() {
 
         // Festival dropdown
         binding.actvFestivalName.setAdapter(
-            ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, FestivalPresets.list)
+            ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line,
+                FestivalPresets.forLanguage(AppLanguageStore.current))
         )
 
         setupMusicPicker()
@@ -113,7 +116,8 @@ class EditorFragment : Fragment() {
                     festivalName     = input.festivalName,
                     customMessage    = input.customMessage,
                     photoUri         = input.personPhotoUri ?: "",
-                    musicStyleOrdinal = input.musicStyle.ordinal
+                    musicStyleOrdinal = input.musicStyle.ordinal,
+                    appLanguageOrdinal = input.appLanguage.ordinal
                 )
             )
         }
@@ -216,8 +220,9 @@ class EditorFragment : Fragment() {
     private fun observeViewModel() {
         viewModel.template.observe(viewLifecycleOwner) { template ->
             template ?: return@observe
+            val localizedName = template.displayName(AppLanguageStore.current)
             binding.tvTemplateName.text     = template.name
-            binding.tvTemplateTeluguName.text = template.teluguName
+            binding.tvTemplateTeluguName.text = localizedName
             binding.tvCategoryBadge.text    = "${template.category.emoji} ${template.category.displayName}"
 
             // FIX: occasion fields (Village/Business/Festival) only make
@@ -230,13 +235,13 @@ class EditorFragment : Fragment() {
                 binding.occasionFieldsGroup.visibility = View.GONE
                 binding.tilCustomMessage.hint = "Your own words (optional)"
                 if (binding.etCustomMessage.text.isNullOrEmpty()) {
-                    binding.etCustomMessage.hint = template.teluguName
+                    binding.etCustomMessage.hint = localizedName
                 }
             } else {
                 binding.occasionFieldsGroup.visibility = View.VISIBLE
                 binding.tilCustomMessage.hint = resources.getString(R.string.hint_custom_message)
                 if (binding.actvFestivalName.text.isEmpty()) {
-                    binding.actvFestivalName.setText(template.teluguName, false)
+                    binding.actvFestivalName.setText(localizedName, false)
                 }
             }
 
@@ -253,7 +258,11 @@ class EditorFragment : Fragment() {
         val msg     = binding.etCustomMessage.text?.toString()?.trim() ?: ""
 
         if (name.isEmpty()) {
-            binding.tilPersonName.error = "పేరు నమోదు చేయండి (Enter name)"
+            binding.tilPersonName.error = when (AppLanguageStore.current) {
+                AppLanguage.HINDI   -> "कृपया नाम दर्ज करें (Enter name)"
+                AppLanguage.ENGLISH -> "Please enter a name"
+                else                -> "పేరు నమోదు చేయండి (Enter name)"
+            }
             binding.tilPersonName.requestFocus()
             return null
         }
@@ -266,7 +275,8 @@ class EditorFragment : Fragment() {
             businessName  = biz,
             festivalName  = fest,
             customMessage = msg,
-            musicStyle    = selectedMusicStyle
+            musicStyle    = selectedMusicStyle,
+            appLanguage   = AppLanguageStore.current
         )
     }
 

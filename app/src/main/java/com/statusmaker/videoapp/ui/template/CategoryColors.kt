@@ -18,6 +18,7 @@ fun TemplateCategory.accentColorRes(): Int = when (this) {
     TemplateCategory.BABY       -> R.color.cat_baby
     TemplateCategory.WEDDING    -> R.color.cat_wedding
     TemplateCategory.BUSINESS   -> R.color.cat_business
+    TemplateCategory.HOUSEWARMING -> R.color.cat_housewarming
     TemplateCategory.GOOD_MORNING -> R.color.cat_good_morning
     TemplateCategory.GOOD_NIGHT   -> R.color.cat_good_night
     TemplateCategory.LOVE         -> R.color.cat_love

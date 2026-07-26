@@ -15,6 +15,7 @@ import com.google.android.material.card.MaterialCardView
 import com.statusmaker.videoapp.R
 import com.statusmaker.videoapp.data.model.Template
 import com.statusmaker.videoapp.data.model.TemplateCategory
+import com.statusmaker.videoapp.utils.AppLanguageStore
 
 // ─── Category Adapter ─────────────────────────────────────────────────────────
 
@@ -42,7 +43,7 @@ class CategoryAdapter(
         val category = categories[position]
         holder.emoji.text = category.emoji
         holder.name.text = category.displayName
-        holder.teluguName.text = category.teluguName
+        holder.teluguName.text = category.localizedName(AppLanguageStore.current)
         holder.container.setOnClickListener { onCategoryClick(category) }
 
         val accent = category.accentColor(holder.container.context)
@@ -96,7 +97,7 @@ class TemplateAdapter(
             catch (e: Exception) { R.drawable.ic_template_placeholder }
         )
         holder.name.text = template.name
-        holder.teluguName.text = template.teluguName
+        holder.teluguName.text = template.displayName(AppLanguageStore.current)
         holder.duration.text = "${template.durationSeconds}s"
         holder.premiumBadge.visibility = if (template.isPremium) View.VISIBLE else View.GONE
         holder.musicIcon.text = when (template.musicStyle.displayName) {

@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
+import com.statusmaker.videoapp.data.model.AppLanguage
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -36,6 +37,18 @@ class PreferenceManager(private val context: Context) {
     /** Used to frequency-cap the App Open ad — see AdManager + SplashActivity. */
     val lastAdShown: Flow<Long> = context.dataStore.data
         .map { it[LAST_AD_SHOWN] ?: 0L }
+
+    /** Content language for templates/videos — see AppLanguageStore for the fast synchronous read. */
+    val appLanguage: Flow<AppLanguage> = context.dataStore.data
+        .map { AppLanguage.fromCode(it[APP_LANGUAGE]) }
+
+    /** True once the user has been through the language picker at least once. */
+    val hasChosenLanguage: Flow<Boolean> = context.dataStore.data
+        .map { it[APP_LANGUAGE] != null }
+
+    suspend fun setAppLanguage(lang: AppLanguage) {
+        context.dataStore.edit { it[APP_LANGUAGE] = lang.code }
+    }
 
     suspend fun setPremium(value: Boolean) {
         context.dataStore.edit { it[IS_PREMIUM] = value }

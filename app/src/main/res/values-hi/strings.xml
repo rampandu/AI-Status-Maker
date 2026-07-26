@@ -1,0 +1,44 @@
+<resources>
+    <!-- app_name intentionally omitted — brand name stays consistent across languages -->
+    <string name="splash_tagline">त्योहार वीडियो • जन्मदिन शुभकामनाएं • राजनीतिक एडिट्स</string>
+
+    <!-- Home -->
+    <string name="home_hero_title">वायरल स्टेटस वीडियो बनाएं 🎬</string>
+    <string name="home_hero_subtitle">त्योहार, जन्मदिन,\nभक्ति और राजनीतिक वीडियो के लिए टेम्पलेट्स</string>
+    <string name="create_video">वीडियो बनाएं</string>
+    <string name="choose_category">श्रेणी चुनें</string>
+
+    <!-- Editor -->
+    <string name="add_photo">अपनी फोटो जोड़ें</string>
+    <string name="photo_hint">गैलरी से चुनने के लिए टैप करें</string>
+    <string name="hint_person_name">नाम / Name *</string>
+    <string name="hint_village_name">गांव / शहर / Village</string>
+    <string name="hint_business_name">व्यापार का नाम / Business Name</string>
+    <string name="hint_festival_name">त्योहार / अवसर / Occasion</string>
+    <string name="hint_custom_message">कस्टम संदेश / Message (optional)</string>
+    <string name="music_style">संगीत शैली / Music Style</string>
+    <string name="preview_video">पूर्वावलोकन और आगे →</string>
+
+    <!-- Errors -->
+    <string name="error_name_required">कृपया नाम दर्ज करें / Please enter a name</string>
+    <string name="error_export_failed">एक्सपोर्ट विफल रहा। कृपया फिर से कोशिश करें।</string>
+
+    <!-- Sharing -->
+    <string name="share_via_whatsapp">WhatsApp पर शेयर करें</string>
+    <string name="share_video">वीडियो शेयर करें</string>
+
+    <!-- Premium -->
+    <string name="go_premium">प्रीमियम में अपग्रेड करें</string>
+    <string name="premium_features">वॉटरमार्क हटाएं • कोई विज्ञापन नहीं • सभी टेम्पलेट्स</string>
+
+    <!-- Bottom Nav -->
+    <string name="nav_home">होम</string>
+    <string name="nav_templates">टेम्पलेट्स</string>
+    <string name="nav_favorites">पसंदीदा</string>
+    <string name="nav_premium">प्रीमियम</string>
+    <string name="my_videos">मेरे वीडियो</string>
+    <string name="nav_my_videos">मेरे वीडियो</string>
+    <string name="export_in_progress">एक्सपोर्ट हो रहा है…</string>
+    <string name="no_videos_yet">अभी तक कोई वीडियो नहीं</string>
+    <string name="change_language">भाषा बदलें</string>
+</resources>

@@ -43,6 +43,11 @@ object FrameRenderer {
                 drawWeddingFrame(canvas, template, userInput, userPhoto, t, width, height)
             TemplateCategory.BUSINESS ->
                 drawBusinessFrame(canvas, template, userInput, userPhoto, t, width, height)
+            // Reuses the Festival frame — the diya/lamp glow is exactly the
+            // right imagery for a griha pravesh puja, and the generic
+            // occasion-name + wishes + person/village layout already fits.
+            TemplateCategory.HOUSEWARMING ->
+                drawFestivalFrame(canvas, template, userInput, userPhoto, t, width, height)
             TemplateCategory.GOOD_MORNING, TemplateCategory.GOOD_NIGHT,
             TemplateCategory.LOVE, TemplateCategory.FRIENDSHIP,
             TemplateCategory.ATTITUDE, TemplateCategory.MOTIVATIONAL ->
@@ -53,6 +58,84 @@ object FrameRenderer {
 
         return bitmap
     }
+
+    // ─── Canvas text localization ─────────────────────────────────────────────
+    // Fixed on-screen phrases (subtitles, placeholders, slogans) that aren't
+    // part of a Template's own content — keyed per AppLanguage so the whole
+    // rendered video matches the user's chosen content language.
+
+    private data class CanvasStrings(
+        val birthdaySubtitle: String,
+        val namePlaceholder: String,
+        val wishesText: String,
+        val devotionalSlogan: String,
+        val devoteePlaceholder: String,
+        val partyPlaceholder: String,
+        val leaderPlaceholder: String,
+        val babyPlaceholder: String,
+        val weddingWishesText: String,
+        val anniversaryWishesText: String,
+        val bridegroomPlaceholder: String,
+        val grandOpeningText: String,
+        val bigSaleText: String,
+        val yourNamePlaceholder: String
+    )
+
+    private val CANVAS_STRINGS: Map<AppLanguage, CanvasStrings> = mapOf(
+        AppLanguage.ENGLISH to CanvasStrings(
+            birthdaySubtitle = "Birthday Wishes",
+            namePlaceholder = "Your Name",
+            wishesText = "Best Wishes",
+            devotionalSlogan = "Jai Jai",
+            devoteePlaceholder = "Devotee Name",
+            partyPlaceholder = "Our Party",
+            leaderPlaceholder = "Leader Name",
+            babyPlaceholder = "Baby's Name",
+            weddingWishesText = "💍 Wedding Wishes",
+            anniversaryWishesText = "💕 Happy Anniversary",
+            bridegroomPlaceholder = "Bride & Groom",
+            grandOpeningText = "🎊 Grand Opening 🎊",
+            bigSaleText = "🔥 Big Sale 🔥",
+            yourNamePlaceholder = "Your Name"
+        ),
+        // Matches the original hardcoded literals exactly — zero visual
+        // change for existing Telugu users.
+        AppLanguage.TELUGU to CanvasStrings(
+            birthdaySubtitle = "పుట్టినరోజు శుభాకాంక్షలు",
+            namePlaceholder = "మీ పేరు",
+            wishesText = "శుభాకాంక్షలు",
+            devotionalSlogan = "జయ జయ",
+            devoteePlaceholder = "భక్తుడు పేరు",
+            partyPlaceholder = "మా పార్టీ",
+            leaderPlaceholder = "నాయకుడు పేరు",
+            babyPlaceholder = "శిశువు పేరు",
+            weddingWishesText = "💍 వివాహ శుభాకాంక్షలు",
+            anniversaryWishesText = "💕 వివాహ వార్షికోత్సవ శుభాకాంక్షలు",
+            bridegroomPlaceholder = "Bride & Groom",
+            grandOpeningText = "🎊 Grand Opening 🎊",
+            bigSaleText = "🔥 Big Sale 🔥",
+            yourNamePlaceholder = "Your Name"
+        ),
+        AppLanguage.HINDI to CanvasStrings(
+            birthdaySubtitle = "जन्मदिन मुबारक हो",
+            namePlaceholder = "आपका नाम",
+            wishesText = "शुभकामनाएं",
+            devotionalSlogan = "जय जय",
+            devoteePlaceholder = "भक्त का नाम",
+            partyPlaceholder = "हमारी पार्टी",
+            leaderPlaceholder = "नेता का नाम",
+            babyPlaceholder = "बच्चे का नाम",
+            weddingWishesText = "💍 विवाह की शुभकामनाएं",
+            anniversaryWishesText = "💕 विवाह वर्षगांठ की शुभकामनाएं",
+            bridegroomPlaceholder = "दूल्हा और दुल्हन",
+            grandOpeningText = "🎊 भव्य उद्घाटन 🎊",
+            bigSaleText = "🔥 बड़ी सेल 🔥",
+            yourNamePlaceholder = "आपका नाम"
+        )
+    )
+
+    private fun canvasStrings(lang: AppLanguage): CanvasStrings =
+        CANVAS_STRINGS[lang] ?: CANVAS_STRINGS.getValue(AppLanguage.TELUGU)
 
     // ─── Background Helpers ───────────────────────────────────────────────────
 
@@ -97,6 +180,7 @@ object FrameRenderer {
     ) {
         val primary = template.primaryColor
         val accent = template.accentColor
+        val strings = canvasStrings(userInput.appLanguage)
 
         // Animated gradient background
         drawGradientBg(canvas, primary, "#1a1a2e", w, h, t, rotate = true)
@@ -123,10 +207,10 @@ object FrameRenderer {
             shadow = true
         )
 
-        // Telugu subtitle
+        // Localized subtitle
         drawStyledText(
             canvas,
-            "పుట్టినరోజు శుభాకాంక్షలు",
+            strings.birthdaySubtitle,
             photoCenterX, titleY + w * 0.09f,
             textSize = w * 0.045f,
             color = Color.parseColor(accent),
@@ -138,7 +222,7 @@ object FrameRenderer {
         val namePaint = Paint().apply { alpha = nameAlpha }
         drawStyledText(
             canvas,
-            userInput.personName.ifEmpty { "Your Name" },
+            userInput.personName.ifEmpty { strings.namePlaceholder },
             photoCenterX, titleY + w * 0.22f,
             textSize = w * 0.08f,
             color = Color.parseColor(primary),
@@ -173,12 +257,13 @@ object FrameRenderer {
         w: Int, h: Int
     ) {
         drawGradientBg(canvas, "#1a0a00", template.primaryColor, w, h, t)
+        val strings = canvasStrings(userInput.appLanguage)
 
         // Diya/lamp glow effect
         drawGlowCircles(canvas, t, w, h, Color.parseColor(template.primaryColor))
 
         // Festival name (center, large)
-        val festivalName = userInput.festivalName.ifEmpty { template.teluguName }
+        val festivalName = userInput.festivalName.ifEmpty { template.displayName(userInput.appLanguage) }
         val festivalScale = 0.8f + sin(t * PI.toFloat() * 2) * 0.05f
         val titleY = h * 0.25f
 
@@ -199,7 +284,7 @@ object FrameRenderer {
         // Wishes text
         drawStyledText(
             canvas,
-            "శుభాకాంక్షలు",
+            strings.wishesText,
             w / 2f, h * 0.65f,
             textSize = w * 0.06f,
             color = Color.WHITE,
@@ -209,7 +294,7 @@ object FrameRenderer {
         // Person & Village
         drawStyledText(
             canvas,
-            userInput.personName.ifEmpty { "మీ పేరు" },
+            userInput.personName.ifEmpty { strings.namePlaceholder },
             w / 2f, h * 0.72f,
             textSize = w * 0.055f,
             color = Color.parseColor(template.primaryColor),
@@ -251,6 +336,7 @@ object FrameRenderer {
     ) {
         // Deep spiritual gradient
         drawGradientBg(canvas, "#0D0D1A", template.primaryColor, w, h)
+        val strings = canvasStrings(userInput.appLanguage)
 
         // Om symbol / halo glow
         val glowPaint = Paint().apply {
@@ -267,7 +353,7 @@ object FrameRenderer {
         drawStyledText(canvas, "🕉", w / 2f, h * 0.08f, w * 0.09f, Color.parseColor(template.accentColor), bold = false)
 
         // Temple/deity name
-        val deityName = userInput.festivalName.ifEmpty { template.teluguName }
+        val deityName = userInput.festivalName.ifEmpty { template.displayName(userInput.appLanguage) }
         drawStyledText(
             canvas, deityName,
             w / 2f, h * 0.60f,
@@ -276,7 +362,7 @@ object FrameRenderer {
 
         // Devotional slogan
         drawStyledText(
-            canvas, "జయ జయ",
+            canvas, strings.devotionalSlogan,
             w / 2f, h * 0.67f,
             w * 0.045f, Color.WHITE, bold = false
         )
@@ -284,7 +370,7 @@ object FrameRenderer {
         // Person name
         drawStyledText(
             canvas,
-            userInput.personName.ifEmpty { "భక్తుడు పేరు" },
+            userInput.personName.ifEmpty { strings.devoteePlaceholder },
             w / 2f, h * 0.77f,
             w * 0.048f, Color.WHITE, bold = true
         )
@@ -314,6 +400,7 @@ object FrameRenderer {
         w: Int, h: Int
     ) {
         drawGradientBg(canvas, "#050510", template.primaryColor, w, h)
+        val strings = canvasStrings(userInput.appLanguage)
 
         // Dramatic light rays
         drawLightRays(canvas, t, w, h, Color.parseColor(template.primaryColor))
@@ -327,7 +414,7 @@ object FrameRenderer {
             Color.parseColor(template.accentColor))
 
         // Party/event name
-        val festivalName = userInput.festivalName.ifEmpty { "మా పార్టీ" }
+        val festivalName = userInput.festivalName.ifEmpty { strings.partyPlaceholder }
         drawStyledText(
             canvas, festivalName,
             w / 2f, h * 0.58f,
@@ -337,7 +424,7 @@ object FrameRenderer {
         // Leader name
         drawStyledText(
             canvas,
-            userInput.personName.ifEmpty { "నాయకుడు పేరు" },
+            userInput.personName.ifEmpty { strings.leaderPlaceholder },
             w / 2f, h * 0.65f,
             w * 0.072f, Color.WHITE, bold = true, shadow = true
         )
@@ -374,6 +461,7 @@ object FrameRenderer {
         w: Int, h: Int
     ) {
         drawGradientBg(canvas, template.accentColor, template.primaryColor, w, h)
+        val strings = canvasStrings(userInput.appLanguage)
 
         // Floating bubbles
         drawBubbles(canvas, t, w, h, Color.WHITE)
@@ -391,14 +479,14 @@ object FrameRenderer {
             w * 0.065f, Color.WHITE, bold = true, shadow = true
         )
         drawStyledText(
-            canvas, template.teluguName,
+            canvas, template.displayName(userInput.appLanguage),
             w / 2f, h * 0.67f,
             w * 0.045f, Color.WHITE.withAlpha(220), bold = false
         )
 
         // Baby/parent name
         drawStyledText(
-            canvas, userInput.personName.ifEmpty { "శిశువు పేరు" },
+            canvas, userInput.personName.ifEmpty { strings.babyPlaceholder },
             w / 2f, h * 0.76f,
             w * 0.06f, Color.WHITE, bold = true
         )
@@ -424,14 +512,16 @@ object FrameRenderer {
         w: Int, h: Int
     ) {
         drawGradientBg(canvas, "#2C0E0E", template.primaryColor, w, h)
+        val strings = canvasStrings(userInput.appLanguage)
 
         // Rose petals falling
         drawRosePetals(canvas, t, w, h)
 
         drawCircularPhoto(canvas, photo, w / 2f, h * 0.33f, w * 0.28f, Color.parseColor(template.accentColor))
 
-        drawStyledText(canvas, "💍 వివాహ శుభాకాంక్షలు", w / 2f, h * 0.60f, w * 0.055f, Color.parseColor(template.accentColor), bold = true, shadow = true)
-        drawStyledText(canvas, userInput.personName.ifEmpty { "Bride & Groom" }, w / 2f, h * 0.67f, w * 0.065f, Color.WHITE, bold = true)
+        val wishesText = if (template.id == "wedding_anniversary") strings.anniversaryWishesText else strings.weddingWishesText
+        drawStyledText(canvas, wishesText, w / 2f, h * 0.60f, w * 0.055f, Color.parseColor(template.accentColor), bold = true, shadow = true)
+        drawStyledText(canvas, userInput.personName.ifEmpty { strings.bridegroomPlaceholder }, w / 2f, h * 0.67f, w * 0.065f, Color.WHITE, bold = true)
 
         if (userInput.villageName.isNotEmpty()) {
             drawStyledText(canvas, userInput.villageName, w / 2f, h * 0.75f, w * 0.038f, Color.WHITE.withAlpha(200))
@@ -459,6 +549,7 @@ object FrameRenderer {
         w: Int, h: Int
     ) {
         drawGradientBg(canvas, template.primaryColor, "#0A0A16", w, h, t, rotate = true)
+        val strings = canvasStrings(userInput.appLanguage)
 
         val accent = Color.parseColor(template.accentColor)
         when (template.category) {
@@ -478,11 +569,11 @@ object FrameRenderer {
         // built-in line if they typed one; otherwise the template's own
         // Telugu line is the quote (with the English version as a subtitle).
         val usingCustom = userInput.customMessage.isNotEmpty()
-        val quoteTe = if (usingCustom) userInput.customMessage else template.teluguName
+        val quoteText = if (usingCustom) userInput.customMessage else template.displayName(userInput.appLanguage)
         val fadeIn = (easeInOut(min(t * 2.2f, 1f)) * 255).toInt().coerceIn(0, 255)
 
         drawWrappedQuoteText(
-            canvas, quoteTe,
+            canvas, quoteText,
             cx = w / 2f, cy = h * 0.40f,
             maxWidth = w * 0.82f,
             textSize = w * 0.062f,
@@ -505,7 +596,7 @@ object FrameRenderer {
         val sigY = h * 0.85f
         drawCircularPhoto(canvas, photo, w * 0.20f, sigY, w * 0.11f, accent, borderWidth = 4f)
         drawStyledText(
-            canvas, "— " + userInput.personName.ifEmpty { "Your Name" },
+            canvas, "— " + userInput.personName.ifEmpty { strings.yourNamePlaceholder },
             w * 0.60f, sigY + w * 0.015f,
             w * 0.045f, Color.WHITE, bold = true
         )
@@ -569,12 +660,13 @@ object FrameRenderer {
         w: Int, h: Int
     ) {
         drawGradientBg(canvas, "#0A0A14", template.primaryColor, w, h)
+        val strings = canvasStrings(userInput.appLanguage)
 
         drawLightRays(canvas, t, w, h, Color.parseColor(template.primaryColor))
 
         drawCircularPhoto(canvas, photo, w / 2f, h * 0.32f, w * 0.26f, Color.parseColor(template.accentColor))
 
-        val bizTitle = if (template.id == "biz_opening") "🎊 Grand Opening 🎊" else "🔥 Big Sale 🔥"
+        val bizTitle = if (template.id == "biz_opening") strings.grandOpeningText else strings.bigSaleText
         drawStyledText(canvas, bizTitle, w / 2f, h * 0.58f, w * 0.058f, Color.parseColor(template.accentColor), bold = true, shadow = true)
 
         val bizName = userInput.businessName.ifEmpty { userInput.personName.ifEmpty { "Business Name" } }

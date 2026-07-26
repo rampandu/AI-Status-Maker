@@ -15,6 +15,7 @@ import com.statusmaker.videoapp.R
 import com.statusmaker.videoapp.data.model.CategorySection
 import com.statusmaker.videoapp.data.model.Template
 import com.statusmaker.videoapp.ui.template.TemplateAdapter
+import com.statusmaker.videoapp.utils.AppLanguageStore
 
 /**
  * Outer vertical adapter for the Home discovery feed. Each row is one
@@ -105,7 +106,8 @@ class HomeSectionsAdapter(
             is AdViewHolder -> bindAd(holder)
             is SectionViewHolder -> {
                 val section = sections[sectionIndex(position)]
-                holder.title.text = "${section.category.emoji} ${section.category.displayName}"
+                holder.title.text = "${section.category.emoji} " +
+                    section.category.localizedName(AppLanguageStore.current)
                 holder.innerAdapter.submitList(section.templates)
                 holder.innerAdapter.updateFavorites(favoriteIds)
                 holder.seeAll.setOnClickListener { onSeeAllClick(section) }

@@ -21,6 +21,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.navigation.fragment.findNavController
 import com.statusmaker.videoapp.R
 import com.statusmaker.videoapp.ads.AdManager
+import com.statusmaker.videoapp.data.model.AppLanguage
 import com.statusmaker.videoapp.data.model.MusicStyle
 import com.statusmaker.videoapp.data.model.UserInput
 import com.statusmaker.videoapp.databinding.FragmentPreviewBinding
@@ -40,6 +41,7 @@ class PreviewFragment : Fragment() {
 
     private var exportedFilePath: String? = null
     private var selectedMusicStyle = MusicStyle.NONE
+    private var selectedAppLanguage = AppLanguage.DEFAULT
     private var previewAudioPlayer: PreviewAudioPlayer? = null
     private var audioReady = false
     private var exoPlayer: ExoPlayer? = null
@@ -69,6 +71,8 @@ class PreviewFragment : Fragment() {
         val templateId     = args.getString("templateId") ?: return
         val musicStyle     = MusicStyle.values()[args.getInt("musicStyleOrdinal", 0)]
         selectedMusicStyle = musicStyle
+        val appLanguage    = AppLanguage.fromOrdinal(args.getInt("appLanguageOrdinal", 0))
+        selectedAppLanguage = appLanguage
 
         val userInput = UserInput(
             personName     = args.getString("personName") ?: "",
@@ -77,7 +81,8 @@ class PreviewFragment : Fragment() {
             businessName   = args.getString("businessName") ?: "",
             festivalName   = args.getString("festivalName") ?: "",
             customMessage  = args.getString("customMessage") ?: "",
-            musicStyle     = musicStyle
+            musicStyle     = musicStyle,
+            appLanguage    = appLanguage
         )
 
         viewModel.loadTemplate(templateId)
@@ -180,7 +185,7 @@ class PreviewFragment : Fragment() {
     private fun observeViewModel() {
         viewModel.template.observe(viewLifecycleOwner) { t ->
             t ?: return@observe
-            binding.tvPreviewTemplateName.text = t.name
+            binding.tvPreviewTemplateName.text = t.displayName(selectedAppLanguage)
             binding.tvPreviewCategory.text =
                 "${t.category.emoji} ${t.category.displayName}  •  " +
                 "${selectedMusicStyle.emoji} ${selectedMusicStyle.displayName}"

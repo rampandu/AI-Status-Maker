@@ -25,13 +25,15 @@ class TemplateRepository(private val context: Context) {
     fun getFreeTemplates(): List<Template> = TEMPLATES.filter { !it.isPremium }
     fun getPremiumTemplates(): List<Template> = TEMPLATES.filter { it.isPremium }
 
+    /** Matches the English name/category plus every language's localized name. */
     fun searchTemplates(query: String): List<Template> {
         if (query.isBlank()) return TEMPLATES
-        val q = query.trim().lowercase()
+        val q = query.trim()
+        val qLower = q.lowercase()
         return TEMPLATES.filter {
-            it.name.lowercase().contains(q) ||
-            it.teluguName.contains(query.trim()) ||
-            it.category.displayName.lowercase().contains(q)
+            it.name.lowercase().contains(qLower) ||
+            it.localizedNames.values.any { localized -> localized.contains(q) } ||
+            it.category.displayName.lowercase().contains(qLower)
         }
     }
 
@@ -57,13 +59,16 @@ class TemplateRepository(private val context: Context) {
     }
 
     companion object {
+        private val TE = AppLanguage.TELUGU
+        private val HI = AppLanguage.HINDI
+
         val TEMPLATES = listOf(
 
             // ── Birthday ────────────────────────────────────────────────────
             Template(
                 id = "bday_gold",
                 name = "Golden Birthday",
-                teluguName = "బంగారు పుట్టినరోజు",
+                localizedNames = mapOf(TE to "బంగారు పుట్టినరోజు", HI to "सुनहरा जन्मदिन"),
                 category = TemplateCategory.BIRTHDAY,
                 thumbnailResId = R.drawable.thumb_bday_gold,
                 durationSeconds = 15,
@@ -76,7 +81,7 @@ class TemplateRepository(private val context: Context) {
             Template(
                 id = "bday_rose",
                 name = "Rose Birthday",
-                teluguName = "రోజ్ పుట్టినరోజు",
+                localizedNames = mapOf(TE to "రోజ్ పుట్టినరోజు", HI to "गुलाबी जन्मदिन"),
                 category = TemplateCategory.BIRTHDAY,
                 thumbnailResId = R.drawable.thumb_bday_rose,
                 durationSeconds = 15,
@@ -89,7 +94,7 @@ class TemplateRepository(private val context: Context) {
             Template(
                 id = "bday_blue",
                 name = "Blue Sparkle Birthday",
-                teluguName = "నీలి మెరుపు పుట్టినరోజు",
+                localizedNames = mapOf(TE to "నీలి మెరుపు పుట్టినరోజు", HI to "नीला चमकीला जन्मदिन"),
                 category = TemplateCategory.BIRTHDAY,
                 thumbnailResId = R.drawable.thumb_bday_blue,
                 durationSeconds = 20,
@@ -102,7 +107,7 @@ class TemplateRepository(private val context: Context) {
             Template(
                 id = "bday_kids",
                 name = "Kids Fun Birthday",
-                teluguName = "పిల్లల పుట్టినరోజు",
+                localizedNames = mapOf(TE to "పిల్లల పుట్టినరోజు", HI to "बच्चों का मजेदार जन्मदिन"),
                 category = TemplateCategory.BIRTHDAY,
                 thumbnailResId = R.drawable.thumb_bday_kids,
                 durationSeconds = 15,
@@ -117,7 +122,7 @@ class TemplateRepository(private val context: Context) {
             Template(
                 id = "sankranti",
                 name = "Sankranti Wishes",
-                teluguName = "సంక్రాంతి శుభాకాంక్షలు",
+                localizedNames = mapOf(TE to "సంక్రాంతి శుభాకాంక్షలు", HI to "मकर संक्रांति की शुभकामनाएं"),
                 category = TemplateCategory.FESTIVAL,
                 thumbnailResId = R.drawable.thumb_sankranti,
                 durationSeconds = 15,
@@ -130,7 +135,7 @@ class TemplateRepository(private val context: Context) {
             Template(
                 id = "ugadi",
                 name = "Ugadi Wishes",
-                teluguName = "ఉగాది శుభాకాంక్షలు",
+                localizedNames = mapOf(TE to "ఉగాది శుభాకాంక్షలు", HI to "उगादी की शुभकामनाएं"),
                 category = TemplateCategory.FESTIVAL,
                 thumbnailResId = R.drawable.thumb_ugadi,
                 durationSeconds = 15,
@@ -143,7 +148,7 @@ class TemplateRepository(private val context: Context) {
             Template(
                 id = "dasara",
                 name = "Dasara Wishes",
-                teluguName = "దసరా శుభాకాంక్షలు",
+                localizedNames = mapOf(TE to "దసరా శుభాకాంక్షలు", HI to "दशहरा की शुभकामनाएं"),
                 category = TemplateCategory.FESTIVAL,
                 thumbnailResId = R.drawable.thumb_dasara,
                 durationSeconds = 15,
@@ -156,7 +161,7 @@ class TemplateRepository(private val context: Context) {
             Template(
                 id = "diwali",
                 name = "Diwali Wishes",
-                teluguName = "దీపావళి శుభాకాంక్షలు",
+                localizedNames = mapOf(TE to "దీపావళి శుభాకాంక్షలు", HI to "दीपावली की शुभकामनाएं"),
                 category = TemplateCategory.FESTIVAL,
                 thumbnailResId = R.drawable.thumb_diwali,
                 durationSeconds = 20,
@@ -169,7 +174,7 @@ class TemplateRepository(private val context: Context) {
             Template(
                 id = "bathukamma",
                 name = "Bathukamma Wishes",
-                teluguName = "బతుకమ్మ శుభాకాంక్షలు",
+                localizedNames = mapOf(TE to "బతుకమ్మ శుభాకాంక్షలు", HI to "बतुकम्मा की शुभकामनाएं"),
                 category = TemplateCategory.FESTIVAL,
                 thumbnailResId = R.drawable.thumb_bathukamma,
                 durationSeconds = 15,
@@ -182,7 +187,7 @@ class TemplateRepository(private val context: Context) {
             Template(
                 id = "vinayaka",
                 name = "Vinayaka Chavithi",
-                teluguName = "వినాయక చవితి శుభాకాంక్షలు",
+                localizedNames = mapOf(TE to "వినాయక చవితి శుభాకాంక్షలు", HI to "गणेश चतुर्थी की शुभकामनाएं"),
                 category = TemplateCategory.FESTIVAL,
                 thumbnailResId = R.drawable.thumb_vinayaka,
                 durationSeconds = 15,
@@ -193,11 +198,145 @@ class TemplateRepository(private val context: Context) {
                 animationStyle = AnimationStyle.FADE
             ),
 
+            // ── Festival (North-Indian / pan-India) ────────────────────────
+            Template(
+                id = "holi",
+                name = "Holi Wishes",
+                localizedNames = mapOf(TE to "హోలీ శుభాకాంక్షలు", HI to "होली की शुभकामनाएं"),
+                category = TemplateCategory.FESTIVAL,
+                thumbnailResId = R.drawable.thumb_holi,
+                durationSeconds = 15,
+                isPremium = false,
+                musicStyle = MusicStyle.FILMY,
+                primaryColor = "#E91E63",
+                accentColor = "#FFC107",
+                animationStyle = AnimationStyle.SPARKLE
+            ),
+            Template(
+                id = "raksha_bandhan",
+                name = "Raksha Bandhan Wishes",
+                localizedNames = mapOf(TE to "రక్షా బంధన్ శుభాకాంక్షలు", HI to "रक्षा बंधन की शुभकामनाएं"),
+                category = TemplateCategory.FESTIVAL,
+                thumbnailResId = R.drawable.thumb_raksha_bandhan,
+                durationSeconds = 15,
+                isPremium = false,
+                musicStyle = MusicStyle.CLASSICAL,
+                primaryColor = "#FF6F91",
+                accentColor = "#FFD700",
+                animationStyle = AnimationStyle.FADE
+            ),
+            Template(
+                id = "karva_chauth",
+                name = "Karva Chauth Wishes",
+                localizedNames = mapOf(TE to "కర్వా చౌత్ శుభాకాంక్షలు", HI to "करवा चौथ की शुभकामनाएं"),
+                category = TemplateCategory.FESTIVAL,
+                thumbnailResId = R.drawable.thumb_karva_chauth,
+                durationSeconds = 20,
+                isPremium = true,
+                musicStyle = MusicStyle.DEVOTIONAL,
+                primaryColor = "#4A148C",
+                accentColor = "#FFD700",
+                animationStyle = AnimationStyle.FADE
+            ),
+            Template(
+                id = "chhath_puja",
+                name = "Chhath Puja Wishes",
+                localizedNames = mapOf(TE to "ఛఠ్ పూజ శుభాకాంక్షలు", HI to "छठ पूजा की शुभकामनाएं"),
+                category = TemplateCategory.FESTIVAL,
+                thumbnailResId = R.drawable.thumb_chhath_puja,
+                durationSeconds = 15,
+                isPremium = false,
+                musicStyle = MusicStyle.DEVOTIONAL,
+                primaryColor = "#FF5722",
+                accentColor = "#FFC107",
+                animationStyle = AnimationStyle.FADE
+            ),
+            Template(
+                id = "navratri",
+                name = "Navratri Wishes",
+                localizedNames = mapOf(TE to "నవరాత్రి శుభాకాంక్షలు", HI to "नवरात्रि की शुभकामनाएं"),
+                category = TemplateCategory.FESTIVAL,
+                thumbnailResId = R.drawable.thumb_navratri,
+                durationSeconds = 15,
+                isPremium = false,
+                musicStyle = MusicStyle.FOLK,
+                primaryColor = "#9C27B0",
+                accentColor = "#FF9800",
+                animationStyle = AnimationStyle.SPARKLE
+            ),
+
+            // ── Festival (pan-India / national / multi-faith) ──────────────
+            Template(
+                id = "eid_mubarak",
+                name = "Eid Mubarak Wishes",
+                localizedNames = mapOf(TE to "ఈద్ ముబారక్ శుభాకాంక్షలు", HI to "ईद मुबारक की शुभकामनाएं"),
+                category = TemplateCategory.FESTIVAL,
+                thumbnailResId = R.drawable.thumb_eid_mubarak,
+                durationSeconds = 15,
+                isPremium = false,
+                musicStyle = MusicStyle.DEVOTIONAL,
+                primaryColor = "#00796B",
+                accentColor = "#FFD700",
+                animationStyle = AnimationStyle.FADE
+            ),
+            Template(
+                id = "christmas",
+                name = "Christmas Wishes",
+                localizedNames = mapOf(TE to "క్రిస్మస్ శుభాకాంక్షలు", HI to "क्रिसमस की शुभकामनाएं"),
+                category = TemplateCategory.FESTIVAL,
+                thumbnailResId = R.drawable.thumb_christmas,
+                durationSeconds = 20,
+                isPremium = true,
+                musicStyle = MusicStyle.CLASSICAL,
+                primaryColor = "#B71C1C",
+                accentColor = "#FFD700",
+                animationStyle = AnimationStyle.SPARKLE
+            ),
+            Template(
+                id = "new_year",
+                name = "New Year Wishes",
+                localizedNames = mapOf(TE to "నూతన సంవత్సర శుభాకాంక్షలు", HI to "नए साल की शुभकामनाएं"),
+                category = TemplateCategory.FESTIVAL,
+                thumbnailResId = R.drawable.thumb_new_year,
+                durationSeconds = 15,
+                isPremium = false,
+                musicStyle = MusicStyle.FILMY,
+                primaryColor = "#1A237E",
+                accentColor = "#FFD700",
+                animationStyle = AnimationStyle.SPARKLE
+            ),
+            Template(
+                id = "independence_day",
+                name = "Independence Day Wishes",
+                localizedNames = mapOf(TE to "స్వాతంత్ర్య దినోత్సవ శుభాకాంక్షలు", HI to "स्वतंत्रता दिवस की शुभकामनाएं"),
+                category = TemplateCategory.FESTIVAL,
+                thumbnailResId = R.drawable.thumb_independence_day,
+                durationSeconds = 15,
+                isPremium = false,
+                musicStyle = MusicStyle.INSTRUMENTAL,
+                primaryColor = "#FF9800",
+                accentColor = "#1B5E20",
+                animationStyle = AnimationStyle.SLIDE
+            ),
+            Template(
+                id = "republic_day",
+                name = "Republic Day Wishes",
+                localizedNames = mapOf(TE to "గణతంత్ర దినోత్సవ శుభాకాంక్షలు", HI to "गणतंत्र दिवस की शुभकामनाएं"),
+                category = TemplateCategory.FESTIVAL,
+                thumbnailResId = R.drawable.thumb_republic_day,
+                durationSeconds = 15,
+                isPremium = false,
+                musicStyle = MusicStyle.INSTRUMENTAL,
+                primaryColor = "#1565C0",
+                accentColor = "#FF9800",
+                animationStyle = AnimationStyle.SLIDE
+            ),
+
             // ── Devotional ──────────────────────────────────────────────────
             Template(
                 id = "balaji",
                 name = "Lord Balaji Wishes",
-                teluguName = "శ్రీ వేంకటేశ్వర స్వామి",
+                localizedNames = mapOf(TE to "శ్రీ వేంకటేశ్వర స్వామి", HI to "श्री वेंकटेश्वर स्वामी"),
                 category = TemplateCategory.DEVOTIONAL,
                 thumbnailResId = R.drawable.thumb_balaji,
                 durationSeconds = 15,
@@ -210,7 +349,7 @@ class TemplateRepository(private val context: Context) {
             Template(
                 id = "durga",
                 name = "Goddess Durga",
-                teluguName = "దుర్గా మాత",
+                localizedNames = mapOf(TE to "దుర్గా మాత", HI to "दुर्गा माता"),
                 category = TemplateCategory.DEVOTIONAL,
                 thumbnailResId = R.drawable.thumb_durga,
                 durationSeconds = 15,
@@ -223,7 +362,7 @@ class TemplateRepository(private val context: Context) {
             Template(
                 id = "krishna",
                 name = "Lord Krishna",
-                teluguName = "శ్రీ కృష్ణ భగవానుడు",
+                localizedNames = mapOf(TE to "శ్రీ కృష్ణ భగవానుడు", HI to "श्री कृष्ण भगवान"),
                 category = TemplateCategory.DEVOTIONAL,
                 thumbnailResId = R.drawable.thumb_krishna,
                 durationSeconds = 15,
@@ -236,7 +375,7 @@ class TemplateRepository(private val context: Context) {
             Template(
                 id = "rama",
                 name = "Lord Rama",
-                teluguName = "శ్రీ రామ భగవానుడు",
+                localizedNames = mapOf(TE to "శ్రీ రామ భగవానుడు", HI to "श्री राम भगवान"),
                 category = TemplateCategory.DEVOTIONAL,
                 thumbnailResId = R.drawable.thumb_rama,
                 durationSeconds = 15,
@@ -251,7 +390,7 @@ class TemplateRepository(private val context: Context) {
             Template(
                 id = "political_1",
                 name = "Political Wishes",
-                teluguName = "రాజకీయ శుభాకాంక్షలు",
+                localizedNames = mapOf(TE to "రాజకీయ శుభాకాంక్షలు", HI to "राजनीतिक शुभकामनाएं"),
                 category = TemplateCategory.POLITICAL,
                 thumbnailResId = R.drawable.thumb_political_1,
                 durationSeconds = 15,
@@ -264,7 +403,7 @@ class TemplateRepository(private val context: Context) {
             Template(
                 id = "political_2",
                 name = "Leader Greetings",
-                teluguName = "నేత శుభాకాంక్షలు",
+                localizedNames = mapOf(TE to "నేత శుభాకాంక్షలు", HI to "नेता जी की शुभकामनाएं"),
                 category = TemplateCategory.POLITICAL,
                 thumbnailResId = R.drawable.thumb_political_2,
                 durationSeconds = 15,
@@ -277,7 +416,7 @@ class TemplateRepository(private val context: Context) {
             Template(
                 id = "political_3",
                 name = "Victory Celebration",
-                teluguName = "విజయ వేడుక",
+                localizedNames = mapOf(TE to "విజయ వేడుక", HI to "विजय समारोह"),
                 category = TemplateCategory.POLITICAL,
                 thumbnailResId = R.drawable.thumb_political_3,
                 durationSeconds = 20,
@@ -292,7 +431,7 @@ class TemplateRepository(private val context: Context) {
             Template(
                 id = "baby_boy",
                 name = "Baby Boy Welcome",
-                teluguName = "మగ బిడ్డ స్వాగతం",
+                localizedNames = mapOf(TE to "మగ బిడ్డ స్వాగతం", HI to "बेटे का स्वागत"),
                 category = TemplateCategory.BABY,
                 thumbnailResId = R.drawable.thumb_baby_boy,
                 durationSeconds = 15,
@@ -305,7 +444,7 @@ class TemplateRepository(private val context: Context) {
             Template(
                 id = "baby_girl",
                 name = "Baby Girl Welcome",
-                teluguName = "ఆడ బిడ్డ స్వాగతం",
+                localizedNames = mapOf(TE to "ఆడ బిడ్డ స్వాగతం", HI to "बेटी का स्वागत"),
                 category = TemplateCategory.BABY,
                 thumbnailResId = R.drawable.thumb_baby_girl,
                 durationSeconds = 15,
@@ -318,7 +457,7 @@ class TemplateRepository(private val context: Context) {
             Template(
                 id = "baby_shower",
                 name = "Baby Shower",
-                teluguName = "బేబీ షవర్",
+                localizedNames = mapOf(TE to "బేబీ షవర్", HI to "बेबी शावर"),
                 category = TemplateCategory.BABY,
                 thumbnailResId = R.drawable.thumb_baby_shower,
                 durationSeconds = 15,
@@ -331,7 +470,7 @@ class TemplateRepository(private val context: Context) {
             Template(
                 id = "baby_naming",
                 name = "Naming Ceremony",
-                teluguName = "నామకరణం",
+                localizedNames = mapOf(TE to "నామకరణం", HI to "नामकरण समारोह"),
                 category = TemplateCategory.BABY,
                 thumbnailResId = R.drawable.thumb_baby_naming,
                 durationSeconds = 15,
@@ -346,7 +485,7 @@ class TemplateRepository(private val context: Context) {
             Template(
                 id = "wedding_classic",
                 name = "Classic Wedding",
-                teluguName = "సాంప్రదాయ వివాహం",
+                localizedNames = mapOf(TE to "సాంప్రదాయ వివాహం", HI to "पारंपरिक विवाह"),
                 category = TemplateCategory.WEDDING,
                 thumbnailResId = R.drawable.thumb_wedding_classic,
                 durationSeconds = 20,
@@ -359,7 +498,7 @@ class TemplateRepository(private val context: Context) {
             Template(
                 id = "wedding_modern",
                 name = "Modern Wedding",
-                teluguName = "ఆధునిక వివాహం",
+                localizedNames = mapOf(TE to "ఆధునిక వివాహం", HI to "आधुनिक विवाह"),
                 category = TemplateCategory.WEDDING,
                 thumbnailResId = R.drawable.thumb_wedding_modern,
                 durationSeconds = 20,
@@ -369,12 +508,25 @@ class TemplateRepository(private val context: Context) {
                 accentColor = "#FFD700",
                 animationStyle = AnimationStyle.SLIDE
             ),
+            Template(
+                id = "wedding_anniversary",
+                name = "Wedding Anniversary",
+                localizedNames = mapOf(TE to "వివాహ వార్షికోత్సవం", HI to "विवाह वर्षगांठ"),
+                category = TemplateCategory.WEDDING,
+                thumbnailResId = R.drawable.thumb_wedding_anniversary,
+                durationSeconds = 15,
+                isPremium = false,
+                musicStyle = MusicStyle.INSTRUMENTAL,
+                primaryColor = "#B76E79",
+                accentColor = "#FFF3E0",
+                animationStyle = AnimationStyle.SPARKLE
+            ),
 
             // ── Business ────────────────────────────────────────────────────
             Template(
                 id = "biz_opening",
                 name = "Grand Opening",
-                teluguName = "గ్రాండ్ ఓపెనింగ్",
+                localizedNames = mapOf(TE to "గ్రాండ్ ఓపెనింగ్", HI to "भव्य उद्घाटन"),
                 category = TemplateCategory.BUSINESS,
                 thumbnailResId = R.drawable.thumb_biz_opening,
                 durationSeconds = 15,
@@ -387,7 +539,7 @@ class TemplateRepository(private val context: Context) {
             Template(
                 id = "biz_offer",
                 name = "Special Offer",
-                teluguName = "స్పెషల్ ఆఫర్",
+                localizedNames = mapOf(TE to "స్పెషల్ ఆఫర్", HI to "विशेष ऑफर"),
                 category = TemplateCategory.BUSINESS,
                 thumbnailResId = R.drawable.thumb_biz_offer,
                 durationSeconds = 15,
@@ -398,11 +550,42 @@ class TemplateRepository(private val context: Context) {
                 animationStyle = AnimationStyle.SLIDE
             ),
 
+            // ── Housewarming ────────────────────────────────────────────────
+            Template(
+                id = "griha_pravesh",
+                name = "Griha Pravesh Wishes",
+                localizedNames = mapOf(TE to "గృహప్రవేశ శుభాకాంక్షలు", HI to "गृह प्रवेश की शुभकामनाएं"),
+                category = TemplateCategory.HOUSEWARMING,
+                thumbnailResId = R.drawable.thumb_griha_pravesh,
+                durationSeconds = 15,
+                isPremium = false,
+                musicStyle = MusicStyle.DEVOTIONAL,
+                primaryColor = "#C97B4A",
+                accentColor = "#FFD700",
+                animationStyle = AnimationStyle.FADE
+            ),
+            Template(
+                id = "new_home",
+                name = "New Home Wishes",
+                localizedNames = mapOf(TE to "కొత్త ఇల్లు శుభాకాంక్షలు", HI to "नए घर की शुभकामनाएं"),
+                category = TemplateCategory.HOUSEWARMING,
+                thumbnailResId = R.drawable.thumb_new_home,
+                durationSeconds = 15,
+                isPremium = true,
+                musicStyle = MusicStyle.CLASSICAL,
+                primaryColor = "#8D6E63",
+                accentColor = "#FFE0B2",
+                animationStyle = AnimationStyle.ZOOM
+            ),
+
             // ── Good Morning ────────────────────────────────────────────────
             Template(
                 id = "morning_sunrise",
                 name = "Rise with the sun, shine with your soul.",
-                teluguName = "సూర్యునితో మేల్కో, మీ ఆత్మతో వెలుగు.",
+                localizedNames = mapOf(
+                    TE to "సూర్యునితో మేల్కో, మీ ఆత్మతో వెలుగు.",
+                    HI to "सूरज के साथ जागो, अपनी आत्मा से चमको।"
+                ),
                 category = TemplateCategory.GOOD_MORNING,
                 thumbnailResId = R.drawable.thumb_morning_sunrise,
                 durationSeconds = 15,
@@ -415,7 +598,10 @@ class TemplateRepository(private val context: Context) {
             Template(
                 id = "morning_chai",
                 name = "A fresh morning, a fresh chance to smile.",
-                teluguName = "కొత్త ఉదయం, నవ్వడానికి కొత్త అవకాశం.",
+                localizedNames = mapOf(
+                    TE to "కొత్త ఉదయం, నవ్వడానికి కొత్త అవకాశం.",
+                    HI to "नई सुबह, मुस्कुराने का नया मौका।"
+                ),
                 category = TemplateCategory.GOOD_MORNING,
                 thumbnailResId = R.drawable.thumb_morning_chai,
                 durationSeconds = 15,
@@ -430,7 +616,10 @@ class TemplateRepository(private val context: Context) {
             Template(
                 id = "night_stars",
                 name = "Let go of today, the stars will hold your dreams.",
-                teluguName = "ఈ రోజును వదిలేయండి, నక్షత్రాలు మీ కలలను పట్టుకుంటాయి.",
+                localizedNames = mapOf(
+                    TE to "ఈ రోజును వదిలేయండి, నక్షత్రాలు మీ కలలను పట్టుకుంటాయి.",
+                    HI to "आज को जाने दो, तारे तुम्हारे सपनों को संभालेंगे।"
+                ),
                 category = TemplateCategory.GOOD_NIGHT,
                 thumbnailResId = R.drawable.thumb_night_stars,
                 durationSeconds = 15,
@@ -443,7 +632,10 @@ class TemplateRepository(private val context: Context) {
             Template(
                 id = "night_moon",
                 name = "Rest well, tomorrow is already smiling at you.",
-                teluguName = "బాగా విశ్రాంతి తీసుకోండి, రేపు మీవైపు నవ్వుతోంది.",
+                localizedNames = mapOf(
+                    TE to "బాగా విశ్రాంతి తీసుకోండి, రేపు మీవైపు నవ్వుతోంది.",
+                    HI to "अच्छी नींद लो, कल पहले से ही तुम्हारी ओर मुस्कुरा रहा है।"
+                ),
                 category = TemplateCategory.GOOD_NIGHT,
                 thumbnailResId = R.drawable.thumb_night_moon,
                 durationSeconds = 15,
@@ -458,7 +650,10 @@ class TemplateRepository(private val context: Context) {
             Template(
                 id = "love_heart",
                 name = "Some hearts just know how to find each other.",
-                teluguName = "కొన్ని హృదయాలు ఒకదానికొకటి కనుగొనడం తెలుసు.",
+                localizedNames = mapOf(
+                    TE to "కొన్ని హృదయాలు ఒకదానికొకటి కనుగొనడం తెలుసు.",
+                    HI to "कुछ दिल एक-दूसरे को ढूंढना जानते हैं।"
+                ),
                 category = TemplateCategory.LOVE,
                 thumbnailResId = R.drawable.thumb_love_heart,
                 durationSeconds = 15,
@@ -471,7 +666,10 @@ class TemplateRepository(private val context: Context) {
             Template(
                 id = "love_roses",
                 name = "Every little moment with you feels like home.",
-                teluguName = "నీతో గడిపే ప్రతి క్షణం ఇంటిలా అనిపిస్తుంది.",
+                localizedNames = mapOf(
+                    TE to "నీతో గడిపే ప్రతి క్షణం ఇంటిలా అనిపిస్తుంది.",
+                    HI to "तुम्हारे साथ हर पल घर जैसा लगता है।"
+                ),
                 category = TemplateCategory.LOVE,
                 thumbnailResId = R.drawable.thumb_love_roses,
                 durationSeconds = 15,
@@ -486,7 +684,10 @@ class TemplateRepository(private val context: Context) {
             Template(
                 id = "friend_squad",
                 name = "Real friends don't need everyday calls to stay close.",
-                teluguName = "నిజమైన మిత్రులకు దగ్గరగా ఉండటానికి ప్రతిరోజు కాల్స్ అవసరం లేదు.",
+                localizedNames = mapOf(
+                    TE to "నిజమైన మిత్రులకు దగ్గరగా ఉండటానికి ప్రతిరోజు కాల్స్ అవసరం లేదు.",
+                    HI to "सच्चे दोस्तों को करीब रहने के लिए रोज़ बात करने की ज़रूरत नहीं होती।"
+                ),
                 category = TemplateCategory.FRIENDSHIP,
                 thumbnailResId = R.drawable.thumb_friend_squad,
                 durationSeconds = 15,
@@ -499,7 +700,10 @@ class TemplateRepository(private val context: Context) {
             Template(
                 id = "friend_bond",
                 name = "Good friends are the family we choose for ourselves.",
-                teluguName = "మంచి మిత్రులు మనం ఎంచుకున్న కుటుంబం.",
+                localizedNames = mapOf(
+                    TE to "మంచి మిత్రులు మనం ఎంచుకున్న కుటుంబం.",
+                    HI to "अच्छे दोस्त वह परिवार हैं जिन्हें हम खुद चुनते हैं।"
+                ),
                 category = TemplateCategory.FRIENDSHIP,
                 thumbnailResId = R.drawable.thumb_friend_bond,
                 durationSeconds = 15,
@@ -514,7 +718,10 @@ class TemplateRepository(private val context: Context) {
             Template(
                 id = "attitude_fire",
                 name = "I don't chase, I attract. What's meant to be will be.",
-                teluguName = "నేను వెంబడించను, ఆకర్షిస్తాను. జరగాల్సింది జరుగుతుంది.",
+                localizedNames = mapOf(
+                    TE to "నేను వెంబడించను, ఆకర్షిస్తాను. జరగాల్సింది జరుగుతుంది.",
+                    HI to "मैं पीछा नहीं करता, आकर्षित करता हूं। जो होना है वो होकर रहेगा।"
+                ),
                 category = TemplateCategory.ATTITUDE,
                 thumbnailResId = R.drawable.thumb_attitude_fire,
                 durationSeconds = 15,
@@ -527,7 +734,10 @@ class TemplateRepository(private val context: Context) {
             Template(
                 id = "attitude_bold",
                 name = "Silence is my reply when words are not worth it.",
-                teluguName = "మాటలు అవసరం లేనప్పుడు మౌనమే నా సమాధానం.",
+                localizedNames = mapOf(
+                    TE to "మాటలు అవసరం లేనప్పుడు మౌనమే నా సమాధానం.",
+                    HI to "जब शब्दों की कीमत नहीं होती, तो मौन ही मेरा जवाब है।"
+                ),
                 category = TemplateCategory.ATTITUDE,
                 thumbnailResId = R.drawable.thumb_attitude_bold,
                 durationSeconds = 15,
@@ -542,7 +752,10 @@ class TemplateRepository(private val context: Context) {
             Template(
                 id = "motivation_rise",
                 name = "Every sunrise is a new page — write something good.",
-                teluguName = "ప్రతి సూర్యోదయం ఒక కొత్త పేజీ — మంచిది రాయండి.",
+                localizedNames = mapOf(
+                    TE to "ప్రతి సూర్యోదయం ఒక కొత్త పేజీ — మంచిది రాయండి.",
+                    HI to "हर सूर्योदय एक नया पन्ना है — कुछ अच्छा लिखो।"
+                ),
                 category = TemplateCategory.MOTIVATIONAL,
                 thumbnailResId = R.drawable.thumb_motivation_rise,
                 durationSeconds = 15,
@@ -555,7 +768,10 @@ class TemplateRepository(private val context: Context) {
             Template(
                 id = "motivation_grind",
                 name = "Small steps every day still take you the whole way.",
-                teluguName = "ప్రతిరోజు చిన్న అడుగులు అయినా మిమ్మల్ని పూర్తి దూరం తీసుకెళ్తాయి.",
+                localizedNames = mapOf(
+                    TE to "ప్రతిరోజు చిన్న అడుగులు అయినా మిమ్మల్ని పూర్తి దూరం తీసుకెళ్తాయి.",
+                    HI to "हर दिन के छोटे कदम भी तुम्हें पूरी मंज़िल तक ले जाते हैं।"
+                ),
                 category = TemplateCategory.MOTIVATIONAL,
                 thumbnailResId = R.drawable.thumb_motivation_grind,
                 durationSeconds = 15,

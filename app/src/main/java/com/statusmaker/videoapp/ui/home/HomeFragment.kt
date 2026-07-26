@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.gms.ads.nativead.NativeAd
@@ -18,7 +19,11 @@ import com.statusmaker.videoapp.ads.AdManager
 import com.statusmaker.videoapp.data.model.CategorySection
 import com.statusmaker.videoapp.data.model.Template
 import com.statusmaker.videoapp.databinding.FragmentHomeBinding
+import com.statusmaker.videoapp.ui.language.LanguagePickerBottomSheet
 import com.statusmaker.videoapp.ui.template.TemplateListFragmentDirections
+import com.statusmaker.videoapp.utils.PreferenceManager
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 class HomeFragment : Fragment() {
 
@@ -42,9 +47,23 @@ class HomeFragment : Fragment() {
         setupSearch()
         observePremiumAndAds()
         startGlowPulse()
+        checkFirstLaunchLanguage()
 
         binding.btnPremium.setOnClickListener {
             findNavController().navigate(R.id.action_homeFragment_to_premiumFragment)
+        }
+        binding.btnLanguage.setOnClickListener {
+            LanguagePickerBottomSheet.show(childFragmentManager, forceChoice = false)
+        }
+    }
+
+    /** Forces the language picker once, the very first time Home is ever shown. */
+    private fun checkFirstLaunchLanguage() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            val hasChosen = PreferenceManager(requireContext()).hasChosenLanguage.first()
+            if (!hasChosen && _binding != null) {
+                LanguagePickerBottomSheet.show(childFragmentManager, forceChoice = true)
+            }
         }
     }
 
