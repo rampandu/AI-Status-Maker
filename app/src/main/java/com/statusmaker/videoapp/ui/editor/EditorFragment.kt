@@ -43,6 +43,7 @@ class EditorFragment : Fragment() {
 
     // Music picker + audition state
     private var selectedMusicStyle = MusicStyle.CLASSICAL
+    private var selectedCustomAudioUri: Uri? = null
     private var auditionPlayer: PreviewAudioPlayer? = null
     private var auditioning = false
 
@@ -71,6 +72,37 @@ class EditorFragment : Fragment() {
             }
         }
     }
+
+    // System audio picker (Storage Access Framework) — needs no runtime
+    // permission since the user is granting access to one specific file via
+    // a system UI, not the whole media library. Cancelling falls back to
+    // whatever style was selected before CUSTOM was tapped.
+    private val audioPickerLauncher = registerForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        if (uri != null) {
+            try {
+                requireContext().contentResolver.takePersistableUriPermission(
+                    uri, Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+            } catch (_: SecurityException) {}
+            selectedCustomAudioUri = uri
+            binding.tvCustomSongName.text = "🎵 " + (queryDisplayName(uri) ?: "Song selected")
+            binding.tvCustomSongName.visibility = View.VISIBLE
+        } else if (selectedCustomAudioUri == null) {
+            // No song ever picked and the user cancelled — CUSTOM with no
+            // file is meaningless, fall back to a real style.
+            checkMusicChip(MusicStyle.CLASSICAL)
+            selectedMusicStyle = MusicStyle.CLASSICAL
+        }
+    }
+
+    private fun queryDisplayName(uri: Uri): String? = try {
+        requireContext().contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+            val nameIdx = cursor.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
+            if (cursor.moveToFirst() && nameIdx >= 0) cursor.getString(nameIdx) else null
+        }
+    } catch (_: Exception) { null }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentEditorBinding.inflate(inflater, container, false)
@@ -117,6 +149,7 @@ class EditorFragment : Fragment() {
                     customMessage    = input.customMessage,
                     photoUri         = input.personPhotoUri ?: "",
                     musicStyleOrdinal = input.musicStyle.ordinal,
+                    customAudioUri   = input.customAudioUri ?: "",
                     appLanguageOrdinal = input.appLanguage.ordinal
                 )
             )
@@ -157,11 +190,20 @@ class EditorFragment : Fragment() {
                 binding.btnAuditionMusic.isEnabled = style != MusicStyle.NONE
                 val wasListening = auditioning
                 stopAudition()
-                if (wasListening && style != MusicStyle.NONE) startAudition()
+                binding.tvCustomSongName.visibility =
+                    if (style == MusicStyle.CUSTOM && selectedCustomAudioUri != null) View.VISIBLE else View.GONE
+                if (style == MusicStyle.CUSTOM) {
+                    audioPickerLauncher.launch(arrayOf("audio/*"))
+                } else if (wasListening) {
+                    startAudition()
+                }
             }
         }
         binding.btnAuditionMusic.setOnClickListener {
             if (auditioning) stopAudition() else startAudition()
+        }
+        binding.tvCustomSongName.setOnClickListener {
+            audioPickerLauncher.launch(arrayOf("audio/*"))
         }
     }
 
@@ -174,10 +216,11 @@ class EditorFragment : Fragment() {
 
     private fun startAudition() {
         if (selectedMusicStyle == MusicStyle.NONE) return
+        if (selectedMusicStyle == MusicStyle.CUSTOM && selectedCustomAudioUri == null) return
         stopAudition()
         auditioning = true
         binding.btnAuditionMusic.text = "⏳ Loading…"
-        val player = PreviewAudioPlayer(selectedMusicStyle)
+        val player = PreviewAudioPlayer(selectedMusicStyle, requireContext(), selectedCustomAudioUri)
         auditionPlayer = player
         player.prepare(viewLifecycleOwner.lifecycleScope) {
             if (_binding != null && auditioning && auditionPlayer === player) {
@@ -268,6 +311,12 @@ class EditorFragment : Fragment() {
         }
         binding.tilPersonName.error = null
 
+        // CUSTOM with no file actually picked (e.g. picker was dismissed
+        // before a first-ever selection) isn't a usable state — fall back
+        // to a real style rather than exporting with a null audio source.
+        val music = if (selectedMusicStyle == MusicStyle.CUSTOM && selectedCustomAudioUri == null)
+            MusicStyle.CLASSICAL else selectedMusicStyle
+
         return UserInput(
             personName    = name,
             personPhotoUri = selectedPhotoUri?.toString(),
@@ -275,7 +324,8 @@ class EditorFragment : Fragment() {
             businessName  = biz,
             festivalName  = fest,
             customMessage = msg,
-            musicStyle    = selectedMusicStyle,
+            musicStyle    = music,
+            customAudioUri = if (music == MusicStyle.CUSTOM) selectedCustomAudioUri?.toString() else null,
             appLanguage   = AppLanguageStore.current
         )
     }

@@ -54,13 +54,27 @@ class VideoGenerator(private val context: Context) {
                 } catch (e: Exception) { null }
             }
 
-            emit(VideoGenState.Progress(8, "Synthesizing music…"))
+            emit(VideoGenState.Progress(8, "Preparing music…"))
 
-            // Pre-generate all audio samples for the video duration
-            val musicSamples: ShortArray = AudioSynthesizer.generate(
-                style           = userInput.musicStyle,
-                durationSeconds = template.durationSeconds
-            )
+            // Pre-generate all audio samples for the video duration. A user-
+            // picked song (CUSTOM style) is decoded to the same PCM contract
+            // procedural music produces; if decoding fails for any reason
+            // (corrupt file, unsupported codec, revoked permission) fall back
+            // to the procedural track rather than aborting the whole export.
+            val musicSamples: ShortArray =
+                if (userInput.musicStyle == MusicStyle.CUSTOM && userInput.customAudioUri != null) {
+                    CustomAudioDecoder.decode(
+                        context, Uri.parse(userInput.customAudioUri), template.durationSeconds
+                    ) ?: run {
+                        Log.w(TAG, "Custom audio decode failed, falling back to procedural music")
+                        AudioSynthesizer.generate(MusicStyle.CLASSICAL, template.durationSeconds)
+                    }
+                } else {
+                    AudioSynthesizer.generate(
+                        style           = userInput.musicStyle,
+                        durationSeconds = template.durationSeconds
+                    )
+                }
             // musicSamples is stereo-interleaved [L0,R0,L1,R1,...]; the encoder
             // and PTS math need the per-channel FRAME count, not the raw
             // interleaved array length (which is 2x that).
@@ -70,12 +84,34 @@ class VideoGenerator(private val context: Context) {
 
             // ── Video encoder ────────────────────────────────────────────
             val videoEncoder = MediaCodec.createEncoderByType(MediaFormat.MIMETYPE_VIDEO_AVC)
+
+            // BUG FIX: COLOR_FormatYUV420Flexible does not promise a byte
+            // layout — many real hardware encoders (MediaTek in particular)
+            // actually expect semi-planar NV12 (interleaved U/V) even when
+            // Flexible is requested, not the planar I420 (separate U then V
+            // planes) this code always wrote. Feeding planar bytes into a
+            // semi-planar buffer scrambles every 2x2 chroma block, which is
+            // exactly the tiled, color-shifted corruption seen in exported
+            // videos on affected devices. Query what this specific encoder
+            // instance actually supports and match the byte layout to it.
+            val useSemiPlanar = try {
+                val supported = videoEncoder.codecInfo
+                    .getCapabilitiesForType(MediaFormat.MIMETYPE_VIDEO_AVC).colorFormats
+                supported.contains(MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar)
+            } catch (e: Exception) {
+                Log.w(TAG, "Could not query encoder color formats, defaulting to planar: ${e.message}")
+                false
+            }
+            val colorFormat = if (useSemiPlanar)
+                MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar
+            else
+                MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Planar
+
             videoEncoder.configure(
                 MediaFormat.createVideoFormat(
                     MediaFormat.MIMETYPE_VIDEO_AVC, VIDEO_WIDTH, VIDEO_HEIGHT
                 ).also {
-                    it.setInteger(MediaFormat.KEY_COLOR_FORMAT,
-                        MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Flexible)
+                    it.setInteger(MediaFormat.KEY_COLOR_FORMAT, colorFormat)
                     it.setInteger(MediaFormat.KEY_BIT_RATE, VIDEO_BIT_RATE)
                     it.setInteger(MediaFormat.KEY_FRAME_RATE, FPS)
                     it.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, I_FRAME_INTERVAL)
@@ -138,7 +174,7 @@ class VideoGenerator(private val context: Context) {
                                 width        = VIDEO_WIDTH,
                                 height       = VIDEO_HEIGHT
                             )
-                            val yuv = bitmapToYUV420(bmp)
+                            val yuv = bitmapToYUV420(bmp, useSemiPlanar)
                             videoEncoder.getInputBuffer(idx)!!.also {
                                 it.clear(); it.put(yuv)
                             }
@@ -276,15 +312,26 @@ class VideoGenerator(private val context: Context) {
 
     // ─── Bitmap → YUV420 ──────────────────────────────────────────────────────
 
-    private fun bitmapToYUV420(bitmap: Bitmap): ByteArray {
+    /**
+     * [semiPlanar] must match whatever color format the encoder was actually
+     * configured with (see the capability query above) — true writes NV12
+     * (Y plane, then interleaved U/V), false writes I420 (Y plane, then a
+     * separate U plane, then a separate V plane). Getting this wrong is what
+     * produces tiled/color-shifted corruption in the exported video.
+     */
+    private fun bitmapToYUV420(bitmap: Bitmap, semiPlanar: Boolean): ByteArray {
         val w = bitmap.width;  val h = bitmap.height
         val pixels = IntArray(w * h)
         bitmap.getPixels(pixels, 0, w, 0, 0, w, h)
 
-        val ySize  = w * h
-        val uvSize = ySize / 4
-        val yuv    = ByteArray(ySize + uvSize * 2)
-        var yIdx = 0;  var uIdx = ySize;  var vIdx = ySize + uvSize
+        val ySize      = w * h
+        val chromaSize = ySize / 2   // U+V combined either way
+        val yuv        = ByteArray(ySize + chromaSize)
+
+        var yIdx  = 0
+        var uvIdx = ySize                      // semi-planar: interleaved U,V,U,V…
+        var uIdx  = ySize                      // planar: separate U plane…
+        var vIdx  = ySize + chromaSize / 2      // …then separate V plane
 
         for (j in 0 until h) {
             for (i in 0 until w) {
@@ -294,8 +341,15 @@ class VideoGenerator(private val context: Context) {
                 val b =  p         and 0xff
                 yuv[yIdx++] = (((66*r+129*g+25*b+128) shr 8)+16).coerceIn(0,255).toByte()
                 if (j%2==0 && i%2==0) {
-                    yuv[uIdx++] = (((-38*r-74*g+112*b+128) shr 8)+128).coerceIn(0,255).toByte()
-                    yuv[vIdx++] = (((112*r-94*g-18*b+128) shr 8)+128).coerceIn(0,255).toByte()
+                    val u = (((-38*r-74*g+112*b+128) shr 8)+128).coerceIn(0,255).toByte()
+                    val v = (((112*r-94*g-18*b+128) shr 8)+128).coerceIn(0,255).toByte()
+                    if (semiPlanar) {
+                        yuv[uvIdx++] = u
+                        yuv[uvIdx++] = v
+                    } else {
+                        yuv[uIdx++] = u
+                        yuv[vIdx++] = v
+                    }
                 }
             }
         }

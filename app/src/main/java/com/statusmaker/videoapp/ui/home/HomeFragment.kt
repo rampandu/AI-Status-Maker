@@ -21,6 +21,7 @@ import com.statusmaker.videoapp.data.model.Template
 import com.statusmaker.videoapp.databinding.FragmentHomeBinding
 import com.statusmaker.videoapp.ui.language.LanguagePickerBottomSheet
 import com.statusmaker.videoapp.ui.template.TemplateListFragmentDirections
+import com.statusmaker.videoapp.ui.template.openTemplateOrShowPaywall
 import com.statusmaker.videoapp.utils.PreferenceManager
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -34,6 +35,7 @@ class HomeFragment : Fragment() {
     private lateinit var sectionsAdapter: HomeSectionsAdapter
     private var nativeAd: NativeAd? = null
     private var nativeAdRequested = false
+    private var isPremiumUser = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
@@ -106,8 +108,17 @@ class HomeFragment : Fragment() {
     }
 
     private fun onTemplateSelected(template: Template) {
-        findNavController().navigate(
-            HomeFragmentDirections.actionHomeFragmentToEditorFragment(template.id)
+        openTemplateOrShowPaywall(
+            template = template,
+            isPremiumUser = isPremiumUser,
+            openEditor = {
+                findNavController().navigate(
+                    HomeFragmentDirections.actionHomeFragmentToEditorFragment(template.id)
+                )
+            },
+            openPremium = {
+                findNavController().navigate(R.id.action_homeFragment_to_premiumFragment)
+            }
         )
     }
 
@@ -135,6 +146,7 @@ class HomeFragment : Fragment() {
             binding.tvVideosCount.text = "$count videos created"
         }
         viewModel.isPremium.observe(viewLifecycleOwner) { isPremium ->
+            isPremiumUser = isPremium
             binding.btnPremium.visibility = if (isPremium) View.GONE else View.VISIBLE
             binding.tvPremiumBadge.visibility = if (isPremium) View.VISIBLE else View.GONE
             if (isPremium) {

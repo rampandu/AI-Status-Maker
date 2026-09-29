@@ -112,7 +112,10 @@ object AudioSynthesizer {
         MusicStyle.CLASSICAL    -> StyleSpec(88.0, 16.0, 2)
         MusicStyle.DEVOTIONAL   -> StyleSpec(78.0, 16.0, 2)
         MusicStyle.INSTRUMENTAL -> StyleSpec(110.0, 8.0, 4)
-        MusicStyle.NONE         -> StyleSpec(120.0, 8.0, 4)
+        // CUSTOM never reaches this generator in practice — VideoGenerator
+        // and PreviewAudioPlayer both branch to the user's own picked song
+        // before calling here. Treat it (and NONE) as silence if it ever did.
+        MusicStyle.NONE, MusicStyle.CUSTOM -> StyleSpec(120.0, 8.0, 4)
     }
 
     private fun build(style: MusicStyle, total: Int, loopMode: Boolean): Ctx {
@@ -124,7 +127,7 @@ object AudioSynthesizer {
             MusicStyle.CLASSICAL    -> buildClassical(ctx, loopMode)
             MusicStyle.DEVOTIONAL   -> buildDevotional(ctx, loopMode)
             MusicStyle.INSTRUMENTAL -> buildInstrumental(ctx, loopMode)
-            MusicStyle.NONE         -> {}
+            MusicStyle.NONE, MusicStyle.CUSTOM -> {}
         }
         return ctx
     }

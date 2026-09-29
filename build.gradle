@@ -1,6 +1,12 @@
 // Top-level build file
 buildscript {
-    ext.kotlin_version = "1.9.22"
+    // Bumped from 1.9.22 during the dependency audit: current Room/Navigation/
+    // AndroidX releases now ship kotlin-stdlib 2.1.x metadata transitively,
+    // which a 1.9.x compiler can't read at all (hard compile failure, not a
+    // warning). Room's annotation processor moved from kapt to KSP
+    // accordingly (see the ksp plugin below + app/build.gradle); Glide stays
+    // on kapt, which is stable under Kotlin 2.x by this point.
+    ext.kotlin_version = "2.2.21"
     repositories {
         google()
         mavenCentral()
@@ -9,8 +15,9 @@ buildscript {
         // AGP 8.9.1+ is required for compileSdk 36 (Android 16); needs Gradle 8.11.1+
         classpath "com.android.tools.build:gradle:8.9.2"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath "com.google.gms:google-services:4.4.1"
-        classpath "androidx.navigation:navigation-safe-args-gradle-plugin:2.7.6"
+        classpath "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:2.2.21-2.0.5"
+        classpath "com.google.gms:google-services:4.5.0"
+        classpath "androidx.navigation:navigation-safe-args-gradle-plugin:2.9.1"
     }
 }
 

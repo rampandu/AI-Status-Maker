@@ -1,22 +1,31 @@
 package com.statusmaker.videoapp.video
 
+import android.content.Context
 import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioTrack
+import android.media.MediaPlayer
+import android.net.Uri
 import android.util.Log
 import com.statusmaker.videoapp.data.model.MusicStyle
 import kotlinx.coroutines.*
 
 /**
- * Streams synthesized audio via AudioTrack during preview.
- * Generates one bar-exact groove cycle (a whole number of musical phrases,
- * ~14-25 s depending on tempo), then loops it indefinitely using
- * AudioTrack.setLoopPoints() for zero-copy gapless repetition. Using the
- * phrase-aligned loop keeps fills/sections intact — the old fixed 4 s buffer
- * cut phrases off mid-bar, which sounded broken.
+ * Streams background audio for the live preview / audition screens.
+ *
+ * Two modes:
+ *  - Procedural styles: generates one bar-exact groove loop via
+ *    AudioSynthesizer and streams it through AudioTrack (unchanged from
+ *    before — phrase-aligned so fills/sections stay intact).
+ *  - MusicStyle.CUSTOM: plays the user's own picked song directly through
+ *    MediaPlayer, looping. No PCM decode needed here — that only happens
+ *    once, at export time, in CustomAudioDecoder — so previewing a custom
+ *    song is as cheap as previewing any other audio file on the device.
  */
 class PreviewAudioPlayer(
-    private val style: MusicStyle
+    private val style: MusicStyle,
+    private val context: Context? = null,
+    private val customAudioUri: Uri? = null
 ) {
     companion object {
         private const val TAG = "PreviewAudioPlayer"
@@ -24,14 +33,42 @@ class PreviewAudioPlayer(
     }
 
     private var audioTrack: AudioTrack? = null
+    private var mediaPlayer: MediaPlayer? = null
     private var prepareJob: Job? = null
     private var ready = false
 
-    /**
-     * Pre-generate samples and load into AudioTrack (static mode).
-     * Call once after template is known; fires [onReady] when playback can start.
-     */
+    /** Call once after template is known; fires [onReady] when playback can start. */
     fun prepare(scope: CoroutineScope, onReady: () -> Unit) {
+        val ctx = context
+        val uri = customAudioUri
+        if (style == MusicStyle.CUSTOM && ctx != null && uri != null) {
+            prepareCustom(ctx, uri, onReady)
+        } else {
+            prepareProcedural(scope, onReady)
+        }
+    }
+
+    private fun prepareCustom(context: Context, uri: Uri, onReady: () -> Unit) {
+        try {
+            mediaPlayer = MediaPlayer().apply {
+                setDataSource(context, uri)
+                isLooping = true
+                setOnPreparedListener {
+                    ready = true
+                    onReady()
+                }
+                setOnErrorListener { _, what, extra ->
+                    Log.e(TAG, "Custom audio playback error: what=$what extra=$extra")
+                    true
+                }
+                prepareAsync()
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Custom audio prepare failed: ${e.message}")
+        }
+    }
+
+    private fun prepareProcedural(scope: CoroutineScope, onReady: () -> Unit) {
         prepareJob = scope.launch(Dispatchers.IO) {
             try {
                 val sampleRate = AudioSynthesizer.SAMPLE_RATE
@@ -83,26 +120,35 @@ class PreviewAudioPlayer(
     fun play() {
         if (!ready) return
         try {
-            audioTrack?.play()
+            mediaPlayer?.start() ?: audioTrack?.play()
         } catch (e: Exception) {
             Log.e(TAG, "play failed: ${e.message}")
         }
     }
 
     fun pause() {
-        try { audioTrack?.pause() } catch (_: Exception) {}
+        try {
+            mediaPlayer?.pause()
+            audioTrack?.pause()
+        } catch (_: Exception) {}
     }
 
     fun resume() {
-        try { if (ready) audioTrack?.play() } catch (_: Exception) {}
+        if (!ready) return
+        try {
+            mediaPlayer?.start() ?: audioTrack?.play()
+        } catch (_: Exception) {}
     }
 
     fun release() {
         prepareJob?.cancel()
         try {
-            audioTrack?.stop()
-            audioTrack?.release()
+            mediaPlayer?.stop(); mediaPlayer?.release()
         } catch (_: Exception) {}
+        try {
+            audioTrack?.stop(); audioTrack?.release()
+        } catch (_: Exception) {}
+        mediaPlayer = null
         audioTrack = null
         ready = false
     }

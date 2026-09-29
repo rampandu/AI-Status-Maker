@@ -712,16 +712,43 @@ object FrameRenderer {
             val top = cy - scaledPhoto.height / 2f
             canvas.drawBitmap(scaledPhoto, left, top, null)
         } else {
-            // Placeholder gradient
-            val placeholderPaint = Paint().apply {
-                shader = RadialGradient(cx, cy, radius, intArrayOf(Color.GRAY, Color.DKGRAY), null, Shader.TileMode.CLAMP)
-            }
-            canvas.drawCircle(cx, cy, radius, placeholderPaint)
-            // Person icon placeholder
-            drawStyledText(canvas, "👤", cx, cy + radius * 0.15f, radius * 0.7f, Color.WHITE)
+            drawPhotoPlaceholder(canvas, cx, cy, radius, borderColor)
         }
 
         canvas.restore()
+    }
+
+    /**
+     * Empty-photo placeholder — tinted with the template's own accent color
+     * (instead of flat gray) so an unfilled slot still reads as "branded,"
+     * with a hand-drawn vector silhouette instead of an emoji glyph. Emoji
+     * rendering (and its color) is controlled by the device's system font,
+     * not the app, so the old "👤" placeholder looked different — and
+     * sometimes clashed with the template palette — from device to device.
+     */
+    private fun drawPhotoPlaceholder(canvas: Canvas, cx: Float, cy: Float, radius: Float, tint: Int) {
+        val light = blend(tint, Color.WHITE, 0.35f)
+        val dark  = blend(tint, Color.BLACK, 0.55f)
+        val placeholderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            shader = RadialGradient(cx, cy - radius * 0.25f, radius * 1.3f,
+                intArrayOf(light, dark), null, Shader.TileMode.CLAMP)
+        }
+        canvas.drawCircle(cx, cy, radius, placeholderPaint)
+
+        val silhouettePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.WHITE.withAlpha(205) }
+        canvas.drawCircle(cx, cy - radius * 0.16f, radius * 0.22f, silhouettePaint)
+        canvas.drawOval(
+            RectF(cx - radius * 0.42f, cy + radius * 0.10f, cx + radius * 0.42f, cy + radius * 0.95f),
+            silhouettePaint
+        )
+    }
+
+    /** Linear RGB blend of [color] toward [with] by [ratio] (0 = color, 1 = with). */
+    private fun blend(color: Int, with: Int, ratio: Float): Int {
+        val r = (Color.red(color) * (1 - ratio) + Color.red(with) * ratio).toInt()
+        val g = (Color.green(color) * (1 - ratio) + Color.green(with) * ratio).toInt()
+        val b = (Color.blue(color) * (1 - ratio) + Color.blue(with) * ratio).toInt()
+        return Color.rgb(r, g, b)
     }
 
     private fun drawOvalPhoto(
@@ -747,12 +774,30 @@ object FrameRenderer {
             val oy = top + (photoH - scaled.height) / 2f
             canvas.drawBitmap(scaled, ox, oy, null)
         } else {
-            val paint = Paint().apply { color = Color.DKGRAY }
-            canvas.drawOval(rectF, paint)
-            drawStyledText(canvas, "👤", left + photoW / 2, top + photoH / 2 + photoH * 0.1f, photoH * 0.4f, Color.WHITE)
+            drawOvalPhotoPlaceholder(canvas, rectF, borderColor)
         }
         canvas.restore()
         canvas.drawOval(rectF, borderPaint)
+    }
+
+    /** Oval counterpart to [drawPhotoPlaceholder] — same tinted-gradient + vector-silhouette look. */
+    private fun drawOvalPhotoPlaceholder(canvas: Canvas, rect: RectF, tint: Int) {
+        val cx = rect.centerX(); val cy = rect.centerY()
+        val rw = rect.width() / 2f; val rh = rect.height() / 2f
+        val light = blend(tint, Color.WHITE, 0.35f)
+        val dark  = blend(tint, Color.BLACK, 0.55f)
+        val placeholderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            shader = RadialGradient(cx, cy - rh * 0.25f, max(rw, rh) * 1.3f,
+                intArrayOf(light, dark), null, Shader.TileMode.CLAMP)
+        }
+        canvas.drawOval(rect, placeholderPaint)
+
+        val silhouettePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.WHITE.withAlpha(205) }
+        canvas.drawCircle(cx, cy - rh * 0.20f, rh * 0.26f, silhouettePaint)
+        canvas.drawOval(
+            RectF(cx - rw * 0.32f, cy + rh * 0.05f, cx + rw * 0.32f, cy + rh * 0.85f),
+            silhouettePaint
+        )
     }
 
     private fun drawStyledText(
@@ -800,21 +845,45 @@ object FrameRenderer {
         )
     }
 
+    /**
+     * Falling confetti. Each piece spins as it falls and twinkles in
+     * opacity, mixing rounded rects with small discs — reads as a produced
+     * particle effect rather than static colored blocks. The palette pulls
+     * from the app's own brand accents (gold/ember/pink/teal/purple)
+     * instead of harsh RGB primaries, so it harmonizes with every
+     * template's own primary/accent color instead of clashing with it.
+     */
     private fun drawConfetti(canvas: Canvas, t: Float, w: Int, h: Int) {
         val rng = java.util.Random(42)
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
         val colors = intArrayOf(
-            Color.YELLOW, Color.RED, Color.CYAN, Color.GREEN, Color.MAGENTA
+            Color.parseColor("#FFD700"), // gold
+            Color.parseColor("#FF7A45"), // ember
+            Color.parseColor("#FF5C8A"), // pink
+            Color.parseColor("#3FC0C7"), // teal
+            Color.parseColor("#B47AEA")  // purple
         )
-        repeat(40) { i ->
+        repeat(36) { i ->
             val x = rng.nextFloat() * w
             val baseY = rng.nextFloat() * h
             val speed = 0.3f + rng.nextFloat() * 0.7f
-            val y = ((baseY + t * h * speed) % h)
+            val y = (baseY + t * h * speed) % h
+            val size = 7f + rng.nextFloat() * 10f
+            val spin = t * 360f * (0.5f + rng.nextFloat()) + i * 47f
+            val twinkle = 140 + (sin((t * 6f + i) * PI.toFloat()) * 60).toInt()
+
             paint.color = colors[i % colors.size]
-            paint.alpha = 180
-            val size = 8f + rng.nextFloat() * 12f
-            canvas.drawRect(x, y, x + size, y + size * 0.5f, paint)
+            paint.alpha = twinkle.coerceIn(90, 220)
+
+            canvas.save()
+            canvas.translate(x, y)
+            canvas.rotate(spin)
+            if (i % 3 == 0) {
+                canvas.drawCircle(0f, 0f, size * 0.4f, paint)
+            } else {
+                canvas.drawRoundRect(RectF(-size / 2, -size * 0.28f, size / 2, size * 0.28f), 2f, 2f, paint)
+            }
+            canvas.restore()
         }
     }
 
@@ -865,18 +934,46 @@ object FrameRenderer {
         }
     }
 
+    /**
+     * Falling rose petals — same production values as [drawConfetti]: real
+     * petal silhouettes (a pinched teardrop, not a flat oval), gentle sway
+     * and spin as they fall, twinkle in opacity, and a proper rose/burgundy
+     * palette instead of one flat Color.RED.
+     */
     private fun drawRosePetals(canvas: Canvas, t: Float, w: Int, h: Int) {
         val rng = java.util.Random(13)
-        val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.RED
-            alpha = 120
-        }
-        repeat(20) {
-            val x = rng.nextFloat() * w
-            val baseY = -50f + rng.nextFloat() * h
-            val y = ((baseY + t * h * 0.4f) % (h + 100f))
-            val r = 8f + rng.nextFloat() * 14f
-            canvas.drawOval(RectF(x, y, x + r * 2, y + r), paint)
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+        val colors = intArrayOf(
+            Color.parseColor("#FF6B95"), // rose pink
+            Color.parseColor("#D63864"), // deep rose
+            Color.parseColor("#FFB6C1"), // light pink
+            Color.parseColor("#8B1E3F")  // burgundy
+        )
+        repeat(22) { i ->
+            val x0 = rng.nextFloat() * w
+            val baseY = -50f + rng.nextFloat() * (h + 100f)
+            val speed = 0.25f + rng.nextFloat() * 0.35f
+            val y = ((baseY + t * h * speed) % (h + 100f)) - 50f
+            val sway = sin((t * 3f + i) * PI.toFloat()) * 30f
+            val x = x0 + sway
+            val size = 10f + rng.nextFloat() * 16f
+            val spin = t * 200f * (0.4f + rng.nextFloat()) + i * 61f
+            val twinkle = 100 + (sin((t * 5f + i * 1.3f) * PI.toFloat()) * 50).toInt()
+
+            paint.color = colors[i % colors.size]
+            paint.alpha = twinkle.coerceIn(70, 180)
+
+            canvas.save()
+            canvas.translate(x, y)
+            canvas.rotate(spin)
+            val petal = Path().apply {
+                moveTo(0f, -size * 0.6f)
+                quadTo(size * 0.5f, 0f, 0f, size * 0.6f)
+                quadTo(-size * 0.5f, 0f, 0f, -size * 0.6f)
+                close()
+            }
+            canvas.drawPath(petal, paint)
+            canvas.restore()
         }
     }
 

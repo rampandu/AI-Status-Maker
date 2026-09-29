@@ -63,6 +63,7 @@ class AdManager private constructor(private val context: Context) {
     private var interstitialAd: InterstitialAd? = null
     private var isRewardedLoading = false
     private var isInterstitialLoading = false
+    private var isShowingInterstitial = false
     private var lastInterstitialTime = 0L
 
     private val pendingRewardedCallbacks = mutableListOf<Pair<() -> Unit, (String) -> Unit>>()
@@ -190,6 +191,16 @@ class AdManager private constructor(private val context: Context) {
      * every 3 minutes.
      */
     fun showInterstitialAd(activity: Activity, onDismissed: () -> Unit = {}) {
+        // Re-entrancy guard — mirrors isShowingAppOpenAd below. Without this,
+        // any caller path that manages to invoke showInterstitialAd() twice
+        // before the first ad's dismiss callback fires (e.g. a rapid double
+        // back-press) could show two full-screen ads back to back, since the
+        // cooldown timestamp is only useful against *later* calls, not a
+        // second call racing in before the first has finished displaying.
+        if (isShowingInterstitial) {
+            Log.d(TAG, "Interstitial already showing, ignoring re-entrant call")
+            onDismissed(); return
+        }
         val now = System.currentTimeMillis()
         if (now - lastInterstitialTime < INTERSTITIAL_COOLDOWN_MS) {
             Log.d(TAG, "Interstitial skipped (cooldown active)")
@@ -200,11 +211,16 @@ class AdManager private constructor(private val context: Context) {
             onDismissed(); loadInterstitialAd(); return
         }
         ad.fullScreenContentCallback = object : FullScreenContentCallback() {
+            override fun onAdShowedFullScreenContent() {
+                isShowingInterstitial = true
+            }
             override fun onAdDismissedFullScreenContent() {
+                isShowingInterstitial = false
                 interstitialAd = null; loadInterstitialAd(); onDismissed()
             }
             override fun onAdFailedToShowFullScreenContent(e: AdError) {
                 Log.w(TAG, "Interstitial failed to show: ${e.message}")
+                isShowingInterstitial = false
                 interstitialAd = null; onDismissed()
             }
         }

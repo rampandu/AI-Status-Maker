@@ -6,27 +6,24 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
+import com.statusmaker.videoapp.billing.BillingManager
 import com.statusmaker.videoapp.databinding.FragmentPremiumBinding
+import com.statusmaker.videoapp.utils.PreferenceManager
+import kotlinx.coroutines.launch
 
 /**
- * Billing temporarily removed — see TODO below. This screen still renders
- * (it's a live bottom-nav destination), but none of the buttons complete a
- * purchase right now. Re-enable by restoring the Play Billing Library
- * (com.android.billingclient:billing-ktx) in app/build.gradle and wiring
- * BillingClient back into setupUI()/launchBillingFlow() — the previous
- * implementation handled SUBS (monthly/annual) + INAPP (watermark removal)
- * with purchase acknowledgement and restore-purchases support.
+ * Real Play Billing purchase flows. See BillingManager for the product/base-plan
+ * IDs that must exist in Play Console before any of these buttons can complete
+ * a purchase — without them Play returns "item unavailable" and the buttons
+ * quietly stay non-functional even though the code path is live.
  */
 class PremiumFragment : Fragment() {
 
     private var _binding: FragmentPremiumBinding? = null
     private val binding get() = _binding!!
 
-    companion object {
-        const val SKU_PREMIUM_MONTHLY  = "premium_monthly"
-        const val SKU_PREMIUM_ANNUAL   = "premium_annual"
-        const val SKU_WATERMARK_REMOVE = "remove_watermark"
-    }
+    private lateinit var billing: BillingManager
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentPremiumBinding.inflate(inflater, container, false)
@@ -35,18 +32,52 @@ class PremiumFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        billing = BillingManager.getInstance(requireContext())
         setupUI()
+        observePremiumState()
+        billing.startConnection { if (_binding != null) refreshPrices() }
     }
 
     private fun setupUI() {
-        binding.btnMonthlyPlan.setOnClickListener     { showComingSoon() }
-        binding.btnAnnualPlan.setOnClickListener      { showComingSoon() }
-        binding.btnRemoveWatermark.setOnClickListener { showComingSoon() }
-        binding.btnRestorePurchases.setOnClickListener { showComingSoon() }
+        binding.btnMonthlyPlan.setOnClickListener {
+            billing.launchSubscriptionPurchase(requireActivity(), BillingManager.BASE_PLAN_MONTHLY)
+        }
+        binding.btnAnnualPlan.setOnClickListener {
+            billing.launchSubscriptionPurchase(requireActivity(), BillingManager.BASE_PLAN_YEARLY)
+        }
+        binding.btnRemoveWatermark.setOnClickListener {
+            billing.launchWatermarkRemovalPurchase(requireActivity())
+        }
+        binding.btnRestorePurchases.setOnClickListener {
+            binding.btnRestorePurchases.isEnabled = false
+            billing.restorePurchases { foundAny ->
+                if (_binding == null) return@restorePurchases
+                binding.btnRestorePurchases.isEnabled = true
+                Toast.makeText(
+                    requireContext(),
+                    if (foundAny) "Purchase restored!" else "No previous purchase found for this account",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
     }
 
-    private fun showComingSoon() {
-        Toast.makeText(requireContext(), "Premium purchases aren't available yet — coming soon!", Toast.LENGTH_LONG).show()
+    /** Swaps the placeholder ₹ prices for the live ones once Play returns them. */
+    private fun refreshPrices() {
+        billing.monthlyPrice()?.let { binding.btnMonthlyPlan.text = "Monthly Premium – $it/month" }
+        billing.yearlyPrice()?.let { binding.btnAnnualPlan.text = "Annual Premium – $it/year" }
+        billing.watermarkRemovalPrice()?.let { binding.btnRemoveWatermark.text = "Remove Watermark Only – $it (one-time)" }
+    }
+
+    private fun observePremiumState() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            PreferenceManager(requireContext()).isPremium.collect { isPremium ->
+                if (_binding == null) return@collect
+                binding.premiumSuccessGroup.visibility = if (isPremium) View.VISIBLE else View.GONE
+                binding.btnMonthlyPlan.isEnabled = !isPremium
+                binding.btnAnnualPlan.isEnabled = !isPremium
+            }
+        }
     }
 
     override fun onDestroyView() {

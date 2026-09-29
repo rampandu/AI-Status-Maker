@@ -71,6 +71,7 @@ class PreviewFragment : Fragment() {
         val templateId     = args.getString("templateId") ?: return
         val musicStyle     = MusicStyle.values()[args.getInt("musicStyleOrdinal", 0)]
         selectedMusicStyle = musicStyle
+        val customAudioUri = args.getString("customAudioUri")?.ifEmpty { null }
         val appLanguage    = AppLanguage.fromOrdinal(args.getInt("appLanguageOrdinal", 0))
         selectedAppLanguage = appLanguage
 
@@ -82,13 +83,16 @@ class PreviewFragment : Fragment() {
             festivalName   = args.getString("festivalName") ?: "",
             customMessage  = args.getString("customMessage") ?: "",
             musicStyle     = musicStyle,
+            customAudioUri = customAudioUri,
             appLanguage    = appLanguage
         )
 
         viewModel.loadTemplate(templateId)
         viewModel.setUserInput(userInput)
 
-        previewAudioPlayer = PreviewAudioPlayer(musicStyle)
+        previewAudioPlayer = PreviewAudioPlayer(
+            musicStyle, requireContext(), customAudioUri?.let { Uri.parse(it) }
+        )
         previewAudioPlayer!!.prepare(viewLifecycleOwner.lifecycleScope) {
             audioReady = true
             if (exoPlayer == null) previewAudioPlayer?.play()
@@ -234,7 +238,9 @@ class PreviewFragment : Fragment() {
     }
 
     private fun showRewardedAdThenExport() {
-        if (viewModel.isPremium.value == true) { startExport(false); return }
+        // Covers both entitlements: full premium AND the standalone
+        // one-time "remove watermark" purchase (see PreviewViewModel).
+        if (viewModel.noWatermarkEntitled) { startExport(false); return }
 
         val adManager = AdManager.getInstance(requireContext())
 

@@ -92,6 +92,10 @@ data class UserInput(
     val festivalName: String = "",
     val customMessage: String = "",
     val musicStyle: MusicStyle = MusicStyle.CLASSICAL,
+    // Set when musicStyle == CUSTOM: a content:// URI (persistable read
+    // permission already taken) pointing at a song the user picked from
+    // their own device via the system file picker.
+    val customAudioUri: String? = null,
     val appLanguage: AppLanguage = AppLanguage.DEFAULT,
     val selectedTemplate: Template? = null
 )
@@ -136,6 +140,10 @@ enum class MusicStyle(val displayName: String, val teluguName: String, val emoji
     DEVOTIONAL("Devotional / Bhakti", "భక్తి", "🪔"),
     FILMY("Filmy / Tollywood", "టాలీవుడ్", "🎬"),
     INSTRUMENTAL("Instrumental", "వాద్య సంగీతం", "🎹"),
+    // User picks a song from their own device (see UserInput.customAudioUri) —
+    // legally distinct from bundling licensed film music: the app is just an
+    // editing tool here, not a source of copyrighted content.
+    CUSTOM("Your Own Song", "మీ స్వంత పాట", "📂"),
     NONE("No Music", "సంగీతం లేదు", "🔇")
 }
 

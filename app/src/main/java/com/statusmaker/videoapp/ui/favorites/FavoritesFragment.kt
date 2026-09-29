@@ -10,10 +10,12 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
+import com.statusmaker.videoapp.R
 import com.statusmaker.videoapp.ads.AdManager
 import com.statusmaker.videoapp.data.model.Template
 import com.statusmaker.videoapp.databinding.FragmentFavoritesBinding
 import com.statusmaker.videoapp.ui.template.TemplateAdapter
+import com.statusmaker.videoapp.ui.template.openTemplateOrShowPaywall
 import com.statusmaker.videoapp.utils.PreferenceManager
 import kotlinx.coroutines.launch
 
@@ -108,8 +110,17 @@ class FavoritesFragment : Fragment() {
     }
 
     private fun onTemplateSelected(template: Template) {
-        findNavController().navigate(
-            FavoritesFragmentDirections.actionFavoritesFragmentToEditorFragment(template.id)
+        openTemplateOrShowPaywall(
+            template = template,
+            isPremiumUser = isPremiumUser,
+            openEditor = {
+                findNavController().navigate(
+                    FavoritesFragmentDirections.actionFavoritesFragmentToEditorFragment(template.id)
+                )
+            },
+            openPremium = {
+                findNavController().navigate(R.id.action_favoritesFragment_to_premiumFragment)
+            }
         )
     }
 

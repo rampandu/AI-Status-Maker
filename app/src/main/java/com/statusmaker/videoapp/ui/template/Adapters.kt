@@ -1,5 +1,6 @@
 package com.statusmaker.videoapp.ui.template
 
+import android.content.res.Resources
 import android.graphics.drawable.GradientDrawable
 import android.view.LayoutInflater
 import android.view.View
@@ -92,10 +93,11 @@ class TemplateAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val template = currentList[position]
 
-        holder.thumbnail.setImageResource(
-            try { template.thumbnailResId }
-            catch (e: Exception) { R.drawable.ic_template_placeholder }
-        )
+        try {
+            holder.thumbnail.setImageResource(template.thumbnailResId)
+        } catch (e: Resources.NotFoundException) {
+            holder.thumbnail.setImageResource(R.drawable.ic_template_placeholder)
+        }
         holder.name.text = template.name
         holder.teluguName.text = template.displayName(AppLanguageStore.current)
         holder.duration.text = "${template.durationSeconds}s"

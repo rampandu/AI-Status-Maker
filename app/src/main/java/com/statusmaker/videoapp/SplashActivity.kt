@@ -4,8 +4,10 @@ import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.view.View
+import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.statusmaker.videoapp.ads.AdManager
@@ -28,6 +30,8 @@ class SplashActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
+
+        onBackPressedDispatcher.addCallback(this) { finish() }
 
         findViewById<View>(R.id.splashGlow)?.let { glow ->
             glowAnimator = ObjectAnimator.ofFloat(glow, View.ALPHA, 0.55f, 1f).apply {
@@ -62,16 +66,18 @@ class SplashActivity : AppCompatActivity() {
     private fun goToMain() {
         if (navigated || isFinishing || isDestroyed) return
         navigated = true
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            overrideActivityTransition(
+                OVERRIDE_TRANSITION_CLOSE, android.R.anim.fade_in, android.R.anim.fade_out
+            )
+        }
         startActivity(Intent(this, MainActivity::class.java)
             .addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION))
         finish()
-        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
-    }
-
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
-        super.onBackPressed()
-        finish()
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            @Suppress("DEPRECATION")
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+        }
     }
 
     override fun onDestroy() {

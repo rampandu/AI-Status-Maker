@@ -32,6 +32,16 @@ class PreviewViewModel(private val context: Context) : ViewModel() {
     private val _isPremium    = MutableLiveData(false)
     val isPremium: LiveData<Boolean> = _isPremium
 
+    // Separate from isPremium: the one-time "remove watermark" purchase only
+    // drops the watermark — it doesn't unlock PRO templates or remove ads,
+    // so it can't be folded into isPremium without over-granting entitlement.
+    private val _isWatermarkRemoved = MutableLiveData(false)
+    val isWatermarkRemoved: LiveData<Boolean> = _isWatermarkRemoved
+
+    /** True if the export/preview should be watermark-free by EITHER entitlement. */
+    val noWatermarkEntitled: Boolean
+        get() = (_isPremium.value ?: false) || (_isWatermarkRemoved.value ?: false)
+
     private var cachedUserPhoto: Bitmap? = null
 
     // FIX #2: single active frame-render job — cancel before launching next
@@ -42,6 +52,9 @@ class PreviewViewModel(private val context: Context) : ViewModel() {
         viewModelScope.launch {
             // Observe premium in real-time (FIX #4)
             prefManager.isPremium.collect { _isPremium.postValue(it) }
+        }
+        viewModelScope.launch {
+            prefManager.isWatermarkRemoved.collect { _isWatermarkRemoved.postValue(it) }
         }
     }
 
@@ -97,7 +110,7 @@ class PreviewViewModel(private val context: Context) : ViewModel() {
                 frameIndex    = wrapped,
                 totalFrames   = totalFrames,
                 progressRatio = ratio,
-                addWatermark  = !(_isPremium.value ?: false),
+                addWatermark  = !noWatermarkEntitled,
                 width  = 360,
                 height = 640
             )

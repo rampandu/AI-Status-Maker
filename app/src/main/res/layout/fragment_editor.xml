@@ -325,6 +325,25 @@
                     app:chipSpacingHorizontal="8dp" />
             </HorizontalScrollView>
 
+            <!-- Shows the picked filename when "Your Own Song" is selected;
+                 tap to pick a different file -->
+            <TextView
+                android:id="@+id/tvCustomSongName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="-14dp"
+                android:layout_marginBottom="18dp"
+                android:background="@drawable/bg_spinner"
+                android:paddingHorizontal="14dp"
+                android:paddingVertical="10dp"
+                android:textColor="@color/accent_gold"
+                android:textSize="13sp"
+                android:ellipsize="middle"
+                android:singleLine="true"
+                android:visibility="gone"
+                android:clickable="true"
+                android:focusable="true" />
+
             <!-- Preview Button -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnPreview"

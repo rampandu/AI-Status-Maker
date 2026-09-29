@@ -174,8 +174,17 @@ class TemplateListFragment : Fragment() {
     }
 
     private fun onTemplateSelected(template: Template) {
-        findNavController().navigate(
-            TemplateListFragmentDirections.actionTemplateListFragmentToEditorFragment(template.id)
+        openTemplateOrShowPaywall(
+            template = template,
+            isPremiumUser = isPremiumUser,
+            openEditor = {
+                findNavController().navigate(
+                    TemplateListFragmentDirections.actionTemplateListFragmentToEditorFragment(template.id)
+                )
+            },
+            openPremium = {
+                findNavController().navigate(R.id.action_templateListFragment_to_premiumFragment)
+            }
         )
     }
 
