@@ -62,6 +62,16 @@ class BillingManager private constructor(context: Context) : PurchasesUpdatedLis
     @Volatile private var isReady = false
     private val onReadyCallbacks = mutableListOf<() -> Unit>()
 
+    // Product/price data arrives from a separate async query that can complete
+    // AFTER onReadyCallbacks already fired — callers that display prices need
+    // a second notification for when that data actually lands.
+    private val onProductDetailsCallbacks = mutableListOf<() -> Unit>()
+
+    /** Fires every time fresh product/price data arrives, not just once on connect. */
+    fun onProductDetailsReady(callback: () -> Unit) {
+        onProductDetailsCallbacks.add(callback)
+    }
+
     private var subscriptionDetails: ProductDetails? = null
     private var watermarkRemoveDetails: ProductDetails? = null
 
@@ -108,6 +118,7 @@ class BillingManager private constructor(context: Context) : PurchasesUpdatedLis
             } else {
                 Log.w(TAG, "Subscription product query failed: ${result.debugMessage}")
             }
+            onProductDetailsCallbacks.forEach { it() }
         }
 
         val inAppParams = QueryProductDetailsParams.newBuilder()
@@ -123,6 +134,7 @@ class BillingManager private constructor(context: Context) : PurchasesUpdatedLis
             } else {
                 Log.w(TAG, "Watermark-removal product query failed: ${result.debugMessage}")
             }
+            onProductDetailsCallbacks.forEach { it() }
         }
     }
 

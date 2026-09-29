@@ -24,6 +24,7 @@ class PremiumFragment : Fragment() {
     private val binding get() = _binding!!
 
     private lateinit var billing: BillingManager
+    private var isWatermarkRemoved = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentPremiumBinding.inflate(inflater, container, false)
@@ -36,6 +37,10 @@ class PremiumFragment : Fragment() {
         setupUI()
         observePremiumState()
         billing.startConnection { if (_binding != null) refreshPrices() }
+        // The product-details query is a separate async call that can finish
+        // after the connection callback above already fired — without this,
+        // the placeholder prices never get replaced with the real ones.
+        billing.onProductDetailsReady { if (_binding != null) refreshPrices() }
     }
 
     private fun setupUI() {
@@ -66,16 +71,29 @@ class PremiumFragment : Fragment() {
     private fun refreshPrices() {
         billing.monthlyPrice()?.let { binding.btnMonthlyPlan.text = "Monthly Premium – $it/month" }
         billing.yearlyPrice()?.let { binding.btnAnnualPlan.text = "Annual Premium – $it/year" }
-        billing.watermarkRemovalPrice()?.let { binding.btnRemoveWatermark.text = "Remove Watermark Only – $it (one-time)" }
+        // Don't clobber the "already owned" label with the price again if a
+        // late-arriving price refresh fires after the purchase succeeded.
+        if (!isWatermarkRemoved) {
+            billing.watermarkRemovalPrice()?.let { binding.btnRemoveWatermark.text = "Remove Watermark Only – $it (one-time)" }
+        }
     }
 
     private fun observePremiumState() {
+        val prefManager = PreferenceManager(requireContext())
         viewLifecycleOwner.lifecycleScope.launch {
-            PreferenceManager(requireContext()).isPremium.collect { isPremium ->
+            prefManager.isPremium.collect { isPremium ->
                 if (_binding == null) return@collect
                 binding.premiumSuccessGroup.visibility = if (isPremium) View.VISIBLE else View.GONE
                 binding.btnMonthlyPlan.isEnabled = !isPremium
                 binding.btnAnnualPlan.isEnabled = !isPremium
+            }
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            prefManager.isWatermarkRemoved.collect { removed ->
+                isWatermarkRemoved = removed
+                if (_binding == null) return@collect
+                binding.btnRemoveWatermark.isEnabled = !removed
+                if (removed) binding.btnRemoveWatermark.text = "✓ Watermark Removed"
             }
         }
     }
